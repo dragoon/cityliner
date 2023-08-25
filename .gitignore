@@ -1,5 +1,5 @@
-./gtfs/
 output/
 venv
 .idea/
 *.lines
+/gtfs/
