@@ -105,8 +105,6 @@ def get_route_color(route_type: str) -> Color:
 
 def draw_routes(c, input_dir: Path, cities, maxmin):
     c.saveState()
-    c.translate(0, A0[1])
-    c.scale(1, -1)  #
 
     for city in cities:
         with open(input_dir / city / "data.lines", 'r') as file:

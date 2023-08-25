@@ -6,8 +6,11 @@ import logging
 from gtfs.geo_utils import MaxDistance
 from gtfs.gtfs import GTFSDataset, BoundingBox, SegmentsDataset
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 def coord2px(lat: float, lng: float, bbox: BoundingBox):
@@ -21,7 +24,7 @@ def create_file(out_dir: str, seg: SegmentsDataset):
     os.makedirs(out_dir, exist_ok=True)
 
     segm_length = len(seg.segments)
-    logger.debug("Starting to create file...")
+    logger.info("Starting to write file: data.lines")
 
     # Open the file once for writing
     with open(os.path.join(out_dir, "data.lines"), "w", encoding="utf-8") as file:
@@ -37,16 +40,17 @@ def create_file(out_dir: str, seg: SegmentsDataset):
                 logger.debug(f"{(segm_length - idx)} segments left")
 
     # Write max and min values
+    logger.info("Starting to write file: maxmin.lines")
     with open(os.path.join(out_dir, "maxmin.lines"), "w", encoding="utf-8") as file:
         file.write(f"{seg.max_trips_per_seg}\n{seg.min_trips_per_seg}")
 
-    logger.debug("Write complete")
+    logger.info("Write complete")
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Make verbose')
+    parser.add_argument('--verbose', '-v', action='count', default=1)
     parser.add_argument('--gtfs', required=True, help='Path to the gtfs directory')
     parser.add_argument('--out', help="Path to the output directory (will be created if doesn't exist)")
     parser.add_argument('--max-dist', type=float, default=20.0, help='Maximum distance from the center on y axis')
@@ -55,6 +59,13 @@ if __name__ == "__main__":
     parser.add_argument('--poster', action='store_true', help='Make drawing for A0 poster size')
 
     args = parser.parse_args()
+    if args.verbose >= 2:
+        logger.setLevel(logging.DEBUG)
+    elif args.verbose == 1:
+        logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.WARNING)
+
     render_area_a0 = {'width': 9933, 'height': 14043}
     center_lat = None
     center_lon = None
@@ -70,11 +81,11 @@ if __name__ == "__main__":
 
     max_dist = MaxDistance(args.max_dist * render_area['width'] / render_area['height'], args.max_dist)
 
-    logger.debug(f"GTFS provider: {args.gtfs}", args.verbose)
-    logger.debug(f"Render area: {render_area['width']} x {render_area['height']} px", args.verbose)
+    logger.debug(f"GTFS provider: {args.gtfs}")
+    logger.debug(f"Render area: {render_area['width']} x {render_area['height']} px")
     if args.center:
-        logger.debug(f"Center coordinates: {center_lat}, {center_lon}", args.verbose)
-    logger.debug(f"Max distance from center: {max_dist.x}x{max_dist.y}km", args.verbose)
+        logger.debug(f"Center coordinates: {center_lat}, {center_lon}")
+    logger.debug(f"Max distance from center: {max_dist.x}x{max_dist.y}km")
 
     required_file = Path("./gtfs/") / args.gtfs / "shapes.txt"
     if not required_file.exists():

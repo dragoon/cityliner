@@ -109,7 +109,7 @@ class GTFSDataset:
         for shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, shape_row in self._parse_shapes():
             # check out of boundaries
             if center_lat and center_lon:
-                if is_allowed_point(shape_pt_lat, shape_pt_lon, center_lat, center_lon, max_dist):
+                if is_allowed_point(float(shape_pt_lat), float(shape_pt_lon), center_lat, center_lon, max_dist):
                     sequences[shape_id][shape_pt_sequence] = shape_row
             else:
                 sequences[shape_id][shape_pt_sequence] = shape_row
