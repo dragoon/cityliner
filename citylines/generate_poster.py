@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.pagesizes import A0
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.graphics.shapes import Path as PdfPath
@@ -32,8 +33,7 @@ def draw_svg_on_pdf(canvas, svg_path, x, y, width=None, height=None):
 
 def draw_poster(input_dir: Path, cities: list[str], provider_icon: str | None, size_x=9933, size_y=14043, poster=False):
     if poster:
-        size_x = 9933
-        size_y = 14043
+        size_x, size_y = A0
     if provider_icon:
         provider_icon_path = f"{provider_icon}.svg"
     # pdfmetrics.registerFont(TTFont('Lato', 'Lato.ttf'))
@@ -104,6 +104,10 @@ def get_route_color(route_type: str) -> Color:
 
 
 def draw_routes(c, input_dir: Path, cities, maxmin):
+    c.saveState()
+    c.translate(0, A0[1])
+    c.scale(1, -1)  #
+
     for city in cities:
         with open(input_dir / city / "data.lines", 'r') as file:
             for lineS in file:
@@ -127,6 +131,7 @@ def draw_routes(c, input_dir: Path, cities, maxmin):
                     color_alpha = Color(color.red, color.green, color.blue, alph / 255.0)
 
                     c.setStrokeColor(color_alpha)
+                    c.setLineCap(2)  # square
 
                     path = c.beginPath()
                     for index, point in enumerate(points):
@@ -137,6 +142,7 @@ def draw_routes(c, input_dir: Path, cities, maxmin):
                             path.lineTo(x, y)
                     c.drawPath(path)
                     path.close()
+    c.restoreState()
 
 
 if __name__ == "__main__":
