@@ -45,7 +45,7 @@ def create_file(out_dir: str, seg: SegmentsDataset):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Process some GTFS data.')
+    parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
     parser.add_argument('--verbose', '-v', action='store_true', help='Make verbose')
     parser.add_argument('--gtfs', required=True, help='Path to the gtfs directory')
     parser.add_argument('--out', help="Path to the output directory (will be created if doesn't exist)")
