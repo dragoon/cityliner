@@ -1,0 +1,5 @@
+./gtfs/
+output/
+venv
+.idea/
+*.lines
