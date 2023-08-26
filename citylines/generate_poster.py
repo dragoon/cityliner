@@ -63,7 +63,7 @@ def draw_single_poster(input_dir: Path, city: str, logos: list[str], size_x=9933
             lines = file.readlines()
             start = 120
             for i, line in enumerate(lines):
-                c.drawString(total_w+300, start+i*140, line.strip())
+                c.drawString(total_w+250, start+i*140, line.strip())
 
         # Adding additional text on the poster
         c.drawRightString(size_x - 200, 260, "Generated on cityliner.io.")
