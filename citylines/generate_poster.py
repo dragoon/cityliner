@@ -33,7 +33,7 @@ def draw_svg_on_pdf(canvas, svg_path, x, y, height):
     return drawing.width, drawing.height
 
 
-def draw_single_poster(input_dir: Path, city: str, logo_name: str, size_x=9933, size_y=14043, poster=False):
+def draw_single_poster(input_dir: Path, city: str, logos: list[str], size_x=9933, size_y=14043, poster=False):
     if poster:
         size_x, size_y = 9933, 14043
     pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
@@ -51,7 +51,10 @@ def draw_single_poster(input_dir: Path, city: str, logo_name: str, size_x=9933, 
         # c.setFont("Lato", 88)  # This sets the font to Lato with size 88
         c.setFont("Helvetica", 88)
         provider_h = 564
-        provider_w, provider_h = draw_svg_on_pdf(c, f"assets/logos/{city}/{logo_name}.svg", 200, 100, height=provider_h)
+        total_w = 0
+        for logo in logos:
+            provider_w, provider_h = draw_svg_on_pdf(c, f"assets/logos/{city}/{logo}", 200+total_w, 100, height=provider_h)
+            total_w += provider_w + 50  # 50 is gap
 
         gray_value = 120 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
@@ -60,7 +63,7 @@ def draw_single_poster(input_dir: Path, city: str, logo_name: str, size_x=9933, 
             lines = file.readlines()
             start = 120
             for i, line in enumerate(lines):
-                c.drawString(provider_w+300, start+i*140, line.strip())
+                c.drawString(total_w+300, start+i*140, line.strip())
 
         # Adding additional text on the poster
         c.drawRightString(size_x - 200, 260, "Generated on cityliner.io.")
@@ -142,4 +145,4 @@ def draw_routes(c, input_dir: Path, city: str, maxmin: float):
 
 
 if __name__ == "__main__":
-    draw_single_poster(Path("."), city="ulm", logo_name="swu", poster=True)
+    draw_single_poster(Path("."), city="ulm", logos=["ulm.svg", "swu.svg"], poster=True)
