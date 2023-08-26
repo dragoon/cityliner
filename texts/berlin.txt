@@ -1,2 +1,2 @@
-Berlin
-Public transport route visuzalization based on GTFS feed by Verkehrsverbund Berlin-Brandenburg
+Based on GTFS feed by Verkehrsverbund Berlin-Brandenburg
+Berlin public transport routes

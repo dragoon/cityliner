@@ -18,18 +18,19 @@ def create_font(font_name, size):
     return font_name, size
 
 
-def draw_svg_on_pdf(canvas, svg_path, x, y, width=None, height=None):
+def draw_svg_on_pdf(canvas, svg_path, x, y, height):
     drawing = svg2rlg(svg_path)
 
-    # Optionally, scale the drawing to the desired width and height
-    if width and height:
-        scaling_x = width / drawing.width
-        scaling_y = height / drawing.height
-        drawing.width = width
-        drawing.height = height
-        drawing.scale(scaling_x, scaling_y)
-
+    # If only height is provided, calculate the scaling factor based on the height,
+    # then compute the resultant width based on the original aspect ratio.
+    scaling_factor = height / drawing.height
+    resultant_width = drawing.width * scaling_factor
+    drawing.width = resultant_width
+    drawing.height = height
+    drawing.scale(scaling_factor, scaling_factor)
     renderPDF.draw(drawing, canvas, x, y)
+
+    return drawing.width, drawing.height
 
 
 def draw_poster(input_dir: Path, cities: list[str], provider_icon: str | None, size_x=9933, size_y=14043, poster=False):
@@ -37,7 +38,7 @@ def draw_poster(input_dir: Path, cities: list[str], provider_icon: str | None, s
         size_x, size_y = 9933, 14043
     if provider_icon:
         provider_icon_path = f"{provider_icon}.svg"
-    #pdfmetrics.registerFont(TTFont('Lato', 'Lato.ttf'))
+    # pdfmetrics.registerFont(TTFont('Lato', 'Lato.ttf'))
 
     c = canvas.Canvas(f"output.pdf", pagesize=(size_x, size_y))
     c.setLineWidth(1)
@@ -49,27 +50,24 @@ def draw_poster(input_dir: Path, cities: list[str], provider_icon: str | None, s
 
     # Handle the poster condition
     if poster:
-        #c.setFont("Lato", 88)  # This sets the font to Lato with size 88
-        c.setFont("Helvetica", 100)
-        # Drawing the provider_icon (adapted for image drawing in reportlab)
-        provider_h = 564.0
-        # provider_w = provider_icon.width * provider_h / provider_icon.height
-        # draw_svg_on_pdf(c, provider_icon_path, 200, size_y - provider_h - 190, provider_w, provider_h)
-        #
-        # # Loading the text file and writing the lines
-        # with open(f"../texts/{cities[0]}.txt", "r") as file:
-        #     lines = file.readlines()
-        #     text = "\n".join(lines)
-        #     c.drawString(380 + provider_w, size_y - 600, text)
+        # c.setFont("Lato", 88)  # This sets the font to Lato with size 88
+        c.setFont("Helvetica", 88)
+        provider_h = 564
+        provider_w, provider_h = draw_svg_on_pdf(c, f"assets/logos/berlin/berlin.svg", 200, 100, height=provider_h)
 
-        # Adding additional text on the poster
         gray_value = 120 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
-        text_object = c.beginText()
-        text_object.setTextOrigin(200, 200)
-        text_to_add = "\n\nGenerated on cityliner.io\nLicense Creative Commons Attribution 4.0 Unported"
-        text_object.textLines(text_to_add)
-        c.drawText(text_object)
+        # # Loading the text file and writing the lines
+        with open(f"texts/berlin.txt", "r") as file:
+            lines = file.readlines()
+            start = 120
+            for i, line in enumerate(lines):
+                c.drawString(provider_w+300, start+i*140, line.strip())
+
+        # Adding additional text on the poster
+        c.drawRightString(size_x - 200, 260, "Generated on cityliner.io.")
+        c.drawRightString(size_x - 200, 120,
+                          "License for personal use only. Redistribution or commercial use is prohibited.")
 
     c.showPage()
     c.save()
@@ -108,9 +106,9 @@ def get_route_color(route_type: str) -> Color:
 
 def draw_routes(c, input_dir: Path, cities, maxmin):
     c.saveState()
-    c.translate(0, A0[1]*2)
+    c.translate(0, A0[1] * 2)
     c.scale(1, -1)
-    c.translate(0, -2*A0[1])
+    c.translate(0, -2 * A0[1])
 
     for city in cities:
         with open(input_dir / city / "data.lines", 'r') as file:

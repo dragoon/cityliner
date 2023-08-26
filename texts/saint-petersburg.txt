@@ -1,2 +1,2 @@
-Saint Petersburg
-Public transport routes visuzalization based on GTFS feed by the ogrp.spb.ru
+Saint Petersburg public transport routes
+Based on GTFS feed by the ogrp.spb.ru
