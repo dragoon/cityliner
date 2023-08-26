@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="250" height="300">
+    <path d="M0,0 V230 V175 a125 125 0 0 0 250 0 V0 Z"/>
+    <path id="I" d="M5,5 V175 a120 120 0 0 0 78.333 112.564 V5 Z" fill="#db0000"/>
+    <use xlink:href="#I" x="-250" transform="scale(-1, 1)"/>
+    <polygon id="X"
+             points="117.5,15 132.5,15 132.5,42.5 160,42.5 160,57.5 132.5,57.5 132.5,85 117.5,85 117.5,57.5 90,57.5 90,42.5 117.5,42.5"
+             fill="#fff" transform="rotate(45 125 50)"/>
+    <use xlink:href="#X" y="100"/>
+    <use xlink:href="#X" y="200"/>
+</svg>
