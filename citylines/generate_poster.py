@@ -8,7 +8,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.graphics.shapes import Path as PdfPath
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
-from reportlab.lib.colors import Color
+from reportlab.lib.colors import Color, HexColor
 import math
 
 from svglib.svglib import svg2rlg
@@ -53,7 +53,8 @@ def draw_single_poster(input_dir: Path, city: str, logos: list[str], size_x=9933
         provider_h = 564
         total_w = 0
         for logo in logos:
-            provider_w, provider_h = draw_svg_on_pdf(c, f"assets/logos/{city}/{logo}", 200+total_w, 100, height=provider_h)
+            provider_w, provider_h = draw_svg_on_pdf(c, f"assets/logos/{city}/{logo}", 200 + total_w, 100,
+                                                     height=provider_h)
             total_w += provider_w + 50  # 50 is gap
 
         gray_value = 120 / 255
@@ -63,7 +64,7 @@ def draw_single_poster(input_dir: Path, city: str, logos: list[str], size_x=9933
             lines = file.readlines()
             start = 120
             for i, line in enumerate(lines):
-                c.drawString(total_w+250, start+i*140, line.strip())
+                c.drawString(total_w + 250, start + i * 140, line.strip())
 
         # Adding additional text on the poster
         c.drawRightString(size_x - 200, 260, "Generated on cityliner.io.")
@@ -80,24 +81,52 @@ def load_lines(input_dir: Path, city) -> float:
         return max_val
 
 
-def get_route_color(route_type: str) -> Color:
+def convert_gtfs_to_digit(route_type):
+    if 0 <= route_type <= 9:
+        return route_type
+    elif 100 <= route_type <= 199:  # rail service
+        return 2  # map to rail
+    elif 200 <= route_type <= 299:  # coach service
+        return 3  # map to bus
+    elif 400 <= route_type <= 404:  # urban rail (subway)
+        return 1  # map to subway
+    elif route_type == 405:  # monorail
+        return 12
+    elif 700 <= route_type <= 799:  # bus service
+        return 3  # map to bus
+    elif 800 <= route_type <= 899:  # trolleybus
+        return 11
+    elif 900 <= route_type <= 999:  # tram service
+        return 0
+    elif route_type == 1000:  # water transport
+        return 15
+    elif 1300 <= route_type <= 1399:  # aerial lift service
+        return 6
+    else:
+        raise ValueError(f"Unknown route type: {route_type}")
+
+
+def get_route_color(route_type: int) -> Color:
+    route_type = convert_gtfs_to_digit(route_type)
     match route_type:
-        case "7":
+        case 7:
             return Color(0.97, 0.38, 0.75)  # funicular
-        case "6":
+        case 6:
             return Color(0.65, 0.33, 0.16)  # gondola
-        case "5":
+        case 5:
             return Color(1, 1, 0.2)  # cable car
-        case "4":
+        case 4:
             return Color(1, 0.5, 0)  # ferry
-        case "3":
+        case 3:
             return Color(0.89, 0.1, 0.11)  # bus
-        case "2":
+        case 2:
             return Color(0.44, 0.53, 0.57)  # rail, inter-city
-        case "1":
+        case 1:
             return Color(0.3, 0.69, 0.29)  # subway, metro
-        case "0":
+        case 0:
             return Color(0.1, 0.46, 0.82)  # tram
+        case 15:
+            return HexColor("#020079")  # water transport
         case _:
             raise ValueError(f"Unknown route type: {route_type}")
 
@@ -115,7 +144,7 @@ def draw_routes(c, input_dir: Path, city: str, maxmin: float):
             route_types = line[1].split(",")
 
             for route_type in route_types:
-                color = get_route_color(route_type)
+                color = get_route_color(int(route_type))
                 points = line[2].split(",")
 
                 factor = 1.7
@@ -145,4 +174,4 @@ def draw_routes(c, input_dir: Path, city: str, maxmin: float):
 
 
 if __name__ == "__main__":
-    draw_single_poster(Path("."), city="ulm", logos=["ulm.svg", "swu.svg"], poster=True)
+    draw_single_poster(Path("."), city="berlin", logos=["berlin_city.svg", "bvg.svg"], poster=True)
