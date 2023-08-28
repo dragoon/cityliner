@@ -40,7 +40,7 @@ def draw_single_poster(input_dir: Path, city: str, logos: list[str], size_x=9933
 
     c = canvas.Canvas(f"output.pdf", pagesize=(size_x, size_y))
     c.setLineWidth(1)
-    c.setFillColorRGB(0.1, 0.1, 0.1)
+    c.setFillColorRGB(0, 0, 0)
     c.rect(0, 0, size_x, size_y, fill=1)
 
     maxmin = load_lines(input_dir, city)
@@ -133,9 +133,8 @@ def get_route_color(route_type: int) -> Color:
 
 def draw_routes(c, input_dir: Path, city: str, maxmin: float):
     c.saveState()
-    c.translate(0, A0[1] * 2)
+    c.translate(0, 14043)
     c.scale(1, -1)
-    c.translate(0, -2 * A0[1])
 
     with open(input_dir / city / "data.lines", 'r') as file:
         for lineS in file:
@@ -174,4 +173,4 @@ def draw_routes(c, input_dir: Path, city: str, maxmin: float):
 
 
 if __name__ == "__main__":
-    draw_single_poster(Path("."), city="berlin", logos=["berlin_city.svg", "bvg.svg"], poster=True)
+    draw_single_poster(Path("."), city="berlin", logos=["berlin_city.svg", "bvg_heart.svg"], poster=True)
