@@ -1,2 +1,4 @@
-reportlab
-svglib
+reportlab~=4.0.4
+svglib~=1.5.1
+Pillow~=10.0.0
+pdf2image
