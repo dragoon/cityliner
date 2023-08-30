@@ -14,8 +14,8 @@ logger.addHandler(handler)
 
 
 def coord2px(lat: float, lng: float, bbox: BoundingBox):
-    coord_x = bbox.width_f * (lng - bbox.left)
-    coord_y = bbox.height_f * (bbox.top - lat)
+    coord_x = bbox.width/2 + (lng - bbox.center_lon) * bbox.scale_factor_lon
+    coord_y = bbox.height/2 - (lat - bbox.center_lat) * bbox.scale_factor_lat
     return {'x': coord_x, 'y': coord_y}
 
 

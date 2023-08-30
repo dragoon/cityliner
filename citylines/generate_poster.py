@@ -1,11 +1,13 @@
+from dataclasses import dataclass
 from pathlib import Path
 
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_RIGHT
+from PIL import Image, ImageDraw, ImageFilter
+
+from pdf2image import convert_from_path
+
 from reportlab.lib.pagesizes import A0
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.graphics.shapes import Path as PdfPath
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
 from reportlab.lib.colors import Color, HexColor
@@ -14,65 +16,129 @@ import math
 from svglib.svglib import svg2rlg
 
 
-def create_font(font_name, size):
-    return font_name, size
+@dataclass
+class Poster:
+    width: int
+    height: int
+    name: str
+    out_dir: Path
+    input_dir: Path
+    city: str
+    logos: list[str]
 
+    def generate_single(self):
+        pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
-def draw_svg_on_pdf(canvas, svg_path, x, y, height):
-    drawing = svg2rlg(svg_path)
+        c = canvas.Canvas(f"{self.name}.pdf", pagesize=(self.width, self.height))
+        c.setLineWidth(1)
+        c.setFillColorRGB(0, 0, 0)
+        c.rect(0, 0, self.width, self.height, fill=1)
 
-    # If only height is provided, calculate the scaling factor based on the height,
-    # then compute the resultant width based on the original aspect ratio.
-    scaling_factor = height / drawing.height
-    resultant_width = drawing.width * scaling_factor
-    drawing.width = resultant_width
-    drawing.height = height
-    drawing.scale(scaling_factor, scaling_factor)
-    renderPDF.draw(drawing, canvas, x, y)
+        maxmin = load_lines(self.input_dir, self.city)
+        self._draw_routes(c, maxmin)
 
-    return drawing.width, drawing.height
-
-
-def draw_single_poster(input_dir: Path, city: str, logos: list[str], size_x=9933, size_y=14043, poster=False):
-    if poster:
-        size_x, size_y = 9933, 14043
-    pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
-
-    c = canvas.Canvas(f"output.pdf", pagesize=(size_x, size_y))
-    c.setLineWidth(1)
-    c.setFillColorRGB(0, 0, 0)
-    c.rect(0, 0, size_x, size_y, fill=1)
-
-    maxmin = load_lines(input_dir, city)
-    draw_routes(c, input_dir, city, maxmin)
-
-    # Handle the poster condition
-    if poster:
-        # c.setFont("Lato", 88)  # This sets the font to Lato with size 88
-        c.setFont("Helvetica", 88)
+        c.setFont("Lato", 88)
         provider_h = 564
         total_w = 0
-        for logo in logos:
-            provider_w, provider_h = draw_svg_on_pdf(c, f"assets/logos/{city}/{logo}", 200 + total_w, 100,
-                                                     height=provider_h)
+        for logo in self.logos:
+            provider_w, provider_h = self._draw_svg_on_pdf(c, f"assets/logos/{self.city}/{logo}", 200 + total_w,
+                                                           100, height=provider_h)
             total_w += provider_w + 50  # 50 is gap
 
-        gray_value = 120 / 255
+        gray_value = 200 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
         # # Loading the text file and writing the lines
-        with open(f"texts/{city}.txt", "r") as file:
+        with open(f"texts/{self.city}.txt", "r") as file:
             lines = file.readlines()
             start = 120
             for i, line in enumerate(lines):
                 c.drawString(total_w + 250, start + i * 140, line.strip())
 
         # Adding additional text on the poster
-        c.drawRightString(size_x - 200, 260, "Generated on cityliner.io.")
-        c.drawRightString(size_x - 200, 120,
+        c.drawRightString(self.width - 200, 260, "Generated on cityliner.io.")
+        c.drawRightString(self.width - 200, 120,
                           "License for personal use only. Redistribution or commercial use is prohibited.")
 
-    c.showPage()
-    c.save()
+        c.showPage()
+        c.save()
+
+    def _draw_svg_on_pdf(self, canvas, svg_path, x, y, height):
+        drawing = svg2rlg(svg_path)
+
+        # If only height is provided, calculate the scaling factor based on the height,
+        # then compute the resultant width based on the original aspect ratio.
+        scaling_factor = height / drawing.height
+        resultant_width = drawing.width * scaling_factor
+        drawing.width = resultant_width
+        drawing.height = height
+        drawing.scale(scaling_factor, scaling_factor)
+        renderPDF.draw(drawing, canvas, x, y)
+
+        return drawing.width, drawing.height
+
+    def apply_fade_effect(self):
+        out_path = self._convert_pdf_to_png()
+        image = Image.open(out_path)
+        fade_distance = int(min(self.width, self.height) / 10)
+        mask = Image.new('L', (self.width, self.height), 255)
+
+        draw = ImageDraw.Draw(mask)
+
+        for i in range(fade_distance):
+            alpha = int(255 * (i / fade_distance))
+            draw.rectangle((i, i, self.width - i, self.height - i), outline=alpha)
+
+        # Ensure that image and backdrop image are in the same mode (either RGB or RGBA)
+        backdrop_image = Image.new(image.mode, image.size, (0, 0, 0, 255))
+        faded_image = Image.composite(image, backdrop_image, mask)
+        faded_image.save(out_path)
+
+    def _convert_pdf_to_png(self):
+        #images = convert_from_path(self.out_dir / f"{self.name}.pdf")
+        # Assuming the PDF has one page
+        out_path = self.out_dir / f"{self.name}.png"
+        #images[0].save(out_path, 'PNG')
+        return out_path
+
+    def _draw_routes(self, c, maxmin: float):
+        c.saveState()
+        c.translate(self.width/2, self.height/2)
+        c.scale(1, -1)
+
+        with open(self.input_dir / self.city / "data.lines", 'r') as file:
+            for lineS in file:
+                line = lineS.split("\t")
+                trips = line[0]
+                route_types = line[1].split(",")
+
+                for route_type in route_types:
+                    color = get_route_color(int(route_type))
+                    points = line[2].split(",")
+
+                    factor = 1.7
+                    stroke_weight = math.log(float(trips) * factor) * 3
+                    if stroke_weight < 0:
+                        stroke_weight = 1.0 * factor
+
+                    c.setLineWidth(stroke_weight)
+                    alph = 100 * (float(trips) / maxmin)
+                    if alph < 20.0:
+                        alph = 20.0
+                    color_alpha = Color(color.red, color.green, color.blue, alph / 255.0)
+
+                    c.setStrokeColor(color_alpha)
+                    c.setLineCap(2)  # square
+
+                    path = c.beginPath()
+                    for index, point in enumerate(points):
+                        x, y = float(point.split(" ")[0]), float(point.split(" ")[1])
+                        if index == 0:
+                            path.moveTo(x, y)
+                        else:
+                            path.lineTo(x, y)
+                    c.drawPath(path)
+                    path.close()
+        c.restoreState()
 
 
 def load_lines(input_dir: Path, city) -> float:
@@ -131,46 +197,8 @@ def get_route_color(route_type: int) -> Color:
             raise ValueError(f"Unknown route type: {route_type}")
 
 
-def draw_routes(c, input_dir: Path, city: str, maxmin: float):
-    c.saveState()
-    c.translate(0, 14043)
-    c.scale(1, -1)
-
-    with open(input_dir / city / "data.lines", 'r') as file:
-        for lineS in file:
-            line = lineS.split("\t")
-            trips = line[0]
-            route_types = line[1].split(",")
-
-            for route_type in route_types:
-                color = get_route_color(int(route_type))
-                points = line[2].split(",")
-
-                factor = 1.7
-                stroke_weight = math.log(float(trips) * factor) * 3
-                if stroke_weight < 0:
-                    stroke_weight = 1.0 * factor
-
-                c.setLineWidth(stroke_weight)
-                alph = 100 * (float(trips) / maxmin)
-                if alph < 20.0:
-                    alph = 20.0
-                color_alpha = Color(color.red, color.green, color.blue, alph / 255.0)
-
-                c.setStrokeColor(color_alpha)
-                c.setLineCap(2)  # square
-
-                path = c.beginPath()
-                for index, point in enumerate(points):
-                    x, y = float(point.split(" ")[0]), float(point.split(" ")[1])
-                    if index == 0:
-                        path.moveTo(x, y)
-                    else:
-                        path.lineTo(x, y)
-                c.drawPath(path)
-                path.close()
-    c.restoreState()
-
-
 if __name__ == "__main__":
-    draw_single_poster(Path("."), city="berlin", logos=["berlin_city.svg", "bvg_heart.svg"], poster=True)
+    p = Poster(9933, 14043, "helsinki", Path("."), Path("."), city="helsinki",
+               logos=["helsinki.svg", "hsl.svg"])
+    p.generate_single()
+    #p.apply_fade_effect()

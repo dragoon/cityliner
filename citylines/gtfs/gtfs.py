@@ -7,15 +7,17 @@ from typing import Iterable, Tuple
 
 import csv
 
-from gtfs.geo_utils import is_allowed_point, MaxDistance
+from citylines.gtfs.geo_utils import is_allowed_point, MaxDistance
 
 
 @dataclass(frozen=True)
 class BoundingBox:
-    left: int
-    right: int
-    top: int
-    bottom: int
+    left: float
+    right: float
+    top: float
+    bottom: float
+    center_lat: float
+    center_lon: float
     render_area: dict
 
     @property
@@ -27,16 +29,20 @@ class BoundingBox:
         return self.top - self.bottom
 
     @property
-    def width_f(self):
-        return self.render_area["width"] / self.width
+    def aspect_ratio(self):
+        return self.width / self.height
 
     @property
-    def height_f(self):
-        return self.render_area["height"] / self.height
+    def canvas_aspect_ratio(self):
+        return self.render_area["width"] / self.render_area["height"]
 
-    @staticmethod
-    def from_shapes() -> 'BoundingBox':
-        pass
+    @property
+    def scale_factor_lat(self):
+        return self.render_area["height"] / max(abs(self.center_lat - self.top), abs(self.center_lat - self.bottom))
+
+    @property
+    def scale_factor_lon(self):
+        return self.render_area["width"] / max(abs(self.center_lon - self.left), abs(self.center_lon - self.right))
 
 
 @dataclass(frozen=True)
@@ -171,7 +177,14 @@ class GTFSDataset:
         logging.debug(f"max trips per segment: {max_trips}")
         logging.debug(f"min trips per segment: {min_trips}")
 
-        return SegmentsDataset(segments, BoundingBox(min_left, max_right, max_top, min_bottom, render_area), max_trips,
+        return SegmentsDataset(segments,
+                               BoundingBox(left=min_left,
+                                           right=max_right,
+                                           top=max_top,
+                                           bottom=min_bottom,
+                                           render_area=render_area,
+                                           center_lat=center_lat,
+                                           center_lon=center_lon), max_trips,
                                min_trips)
 
     @staticmethod
@@ -181,15 +194,16 @@ class GTFSDataset:
 
 def get_route_type_for_shape_id(shape_id, route_types):
     route_type = route_types.get(shape_id)
-    short_type = route_type // 100  # Integer division to get the equivalent of '>>0'
+    if route_type:
+        short_type = route_type // 100  # Integer division to get the equivalent of '>>0'
 
-    if short_type == 7:
-        route_type = 3
-    elif short_type == 1:
-        route_type = 2
-    elif short_type == 5:
-        route_type = 1
-    elif short_type in [9, 8]:
-        route_type = 0
+        if short_type == 7:
+            route_type = 3
+        elif short_type == 1:
+            route_type = 2
+        elif short_type == 5:
+            route_type = 1
+        elif short_type in [9, 8]:
+            route_type = 0
 
     return route_type
