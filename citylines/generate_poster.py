@@ -94,15 +94,15 @@ class Poster:
         faded_image.save(out_path)
 
     def _convert_pdf_to_png(self):
-        #images = convert_from_path(self.out_dir / f"{self.name}.pdf")
+        # images = convert_from_path(self.out_dir / f"{self.name}.pdf")
         # Assuming the PDF has one page
         out_path = self.out_dir / f"{self.name}.png"
-        #images[0].save(out_path, 'PNG')
+        # images[0].save(out_path, 'PNG')
         return out_path
 
     def _draw_routes(self, c, maxmin: float):
         c.saveState()
-        c.translate(self.width/2, self.height/2)
+        c.translate(self.width / 2, self.height / 2)
         c.scale(1, -1)
 
         with open(self.input_dir / self.city / "data.lines", 'r') as file:
@@ -198,7 +198,8 @@ def get_route_color(route_type: int) -> Color:
 
 
 if __name__ == "__main__":
-    p = Poster(9933, 14043, "helsinki", Path("."), Path("."), city="helsinki",
+    p = Poster(9933, 14043, name="helsinki", out_dir=Path("./posters"),
+               input_dir=Path("./processed"), city="helsinki",
                logos=["helsinki.svg", "hsl.svg"])
     p.generate_single()
-    #p.apply_fade_effect()
+    # p.apply_fade_effect()

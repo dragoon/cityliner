@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
     parser.add_argument('--verbose', '-v', action='count', default=1)
     parser.add_argument('--gtfs', required=True, help='Path to the gtfs directory')
-    parser.add_argument('--out', help="Path to the output directory (will be created if doesn't exist)")
+    parser.add_argument('--out',  required=True, help="Path to the output directory (will be created if doesn't exist)")
     parser.add_argument('--max-dist', type=float, default=20.0, help='Maximum distance from the center on y axis')
     parser.add_argument('--size', type=int, default=5000, help='Size of the output drawing in px')
     parser.add_argument('--center', help='Coordinates of the center')
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     render_area_a0 = {'width': 9933, 'height': 14043}
     center_lat = None
     center_lon = None
-    out_dir = args.out or args.gtfs
+    out_dir = args.out
 
     if args.center:
         center_lat, center_lon = map(float, args.center.split(","))
@@ -87,12 +87,12 @@ if __name__ == "__main__":
         logger.debug(f"Center coordinates: {center_lat}, {center_lon}")
     logger.debug(f"Max distance from center: {max_dist.x}x{max_dist.y}km")
 
-    required_file = Path("./gtfs/") / args.gtfs / "shapes.txt"
+    required_file = Path(args.gtfs) / "shapes.txt"
     if not required_file.exists():
         print(f"\nERROR: {required_file} does not exist.\nExiting.\n")
         exit(1)
 
     logger.debug("Starting to prepare data...")
-    dataset = GTFSDataset.from_path(Path("./gtfs/") / args.gtfs)
+    dataset = GTFSDataset.from_path(args.gtfs)
     segments = dataset.compute_segments(center_lat, center_lon, render_area, max_dist)
     create_file(out_dir, segments)
