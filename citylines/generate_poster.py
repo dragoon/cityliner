@@ -168,6 +168,8 @@ def convert_gtfs_to_digit(route_type):
         return 15
     elif 1300 <= route_type <= 1399:  # aerial lift service
         return 6
+    elif route_type == 1400:  # aerial lift service
+        return 6
     else:
         raise ValueError(f"Unknown route type: {route_type}")
 
@@ -198,8 +200,8 @@ def get_route_color(route_type: int) -> Color:
 
 
 if __name__ == "__main__":
-    p = Poster(9933, 14043, name="helsinki", out_dir=Path("./posters"),
-               input_dir=Path("./processed"), city="helsinki",
-               logos=["helsinki.svg", "hsl.svg"])
+    p = Poster(9933, 14043, name="zurich", out_dir=Path("./posters"),
+               input_dir=Path("./processed"), city="zurich",
+               logos=["zurich_coat_of_arms_text.svg"])
     p.generate_single()
     # p.apply_fade_effect()
