@@ -1,10 +1,12 @@
 import requests
 
+from citylines.gtfs.gtfs import BoundingBox, coord2px
 
-def get_osm_water_bodies(bbox):
+
+def get_osm_water_bodies(bbox: BoundingBox):
     overpass_url = "https://overpass-api.de/api/interpreter"
     query = f"""
-    [out:json][bbox:{bbox[0]},{bbox[1]},{bbox[2]},{bbox[3]}];
+    [out:json][bbox:{bbox.bottom},{bbox.left},{bbox.top},{bbox.bottom}];
     way["natural"="water"];
     (._;>;);
     out;
@@ -12,7 +14,11 @@ def get_osm_water_bodies(bbox):
     response = requests.get(overpass_url, params={'data': query})
     data = response.json()
     flat_ways = []
-    node_dict = {n["id"]: {"lat": n["lat"], "lon": n["lon"]} for n in data["elements"] if n["type"] == "node"}
+    node_dict = {}
+    for n in data["elements"]:
+        if n["type"] == "node":
+            px = coord2px(n["lat"], n["lon"], bbox)
+            node_dict[n["id"]] = px
     for way in data["elements"]:
         if way["type"] == "way":
             way_nodes = [node_dict[n_id] for n_id in way["nodes"]]

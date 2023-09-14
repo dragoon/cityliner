@@ -6,19 +6,13 @@ import logging
 
 from citylines.osm.water import get_osm_water_bodies
 from gtfs.geo_utils import MaxDistance
-from gtfs.gtfs import GTFSDataset, BoundingBox, SegmentsDataset
+from gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)s: %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-
-
-def coord2px(lat: float, lng: float, bbox: BoundingBox):
-    coord_x = bbox.width/2 + (lng - bbox.center_lon) * bbox.scale_factor_lon
-    coord_y = bbox.height/2 - (lat - bbox.center_lat) * bbox.scale_factor_lat
-    return {'x': coord_x, 'y': coord_y}
 
 
 def create_file(out_dir: str, seg: SegmentsDataset):
@@ -32,8 +26,10 @@ def create_file(out_dir: str, seg: SegmentsDataset):
     with open(os.path.join(out_dir, "data.lines"), "w", encoding="utf-8") as file:
         for idx, segment in enumerate(seg.segments):
             coords = ",".join(
-                f'{coord2px(float(un["lat"]), float(un["lon"]), seg.bbox)["x"]} {coord2px(float(un["lat"]), float(un["lon"]), seg.bbox)["y"]}'
-                for un in segment["coordinates"])
+                f'{px["x"]} {px["y"]}'
+                for un in segment["coordinates"]
+                for px in [coord2px(float(un["lat"]), float(un["lon"]), seg.bbox)]
+            )
             route_type = segment["route_type"]
             line = f"{segment['trips']}\t{route_type}\t{coords}\n"
             file.write(line)
@@ -97,7 +93,7 @@ if __name__ == "__main__":
     logger.debug("Starting to prepare data...")
     dataset = GTFSDataset.from_path(args.gtfs)
     segments = dataset.compute_segments(center_lat, center_lon, render_area, max_dist)
-    water_bodies = get_osm_water_bodies(bbox=(segments.bbox.bottom, segments.bbox.left, segments.bbox.top, segments.bbox.right))
+    water_bodies = get_osm_water_bodies(bbox=segments.bbox)
     with open(f'{out_dir}/water_bodies_osm.json', 'w') as f:
         json.dump(water_bodies, f)
     create_file(out_dir, segments)
