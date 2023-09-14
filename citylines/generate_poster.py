@@ -112,7 +112,8 @@ class Poster:
                 route_types = line[1].split(",")
 
                 for route_type in route_types:
-                    color = get_route_color(int(route_type))
+                    simple_route_type = convert_gtfs_to_digit(int(route_type))
+                    color = get_route_color(simple_route_type)
                     points = line[2].split(",")
 
                     factor = 1.7
@@ -128,6 +129,12 @@ class Poster:
 
                     c.setStrokeColor(color_alpha)
                     c.setLineCap(2)  # square
+
+                    if simple_route_type == 15:
+                        # water transport
+                        c.setDash(50, 50)
+                    else:
+                        c.setDash([])
 
                     path = c.beginPath()
                     for index, point in enumerate(points):
@@ -147,7 +154,7 @@ def load_lines(input_dir: Path, city) -> float:
         return max_val
 
 
-def convert_gtfs_to_digit(route_type):
+def convert_gtfs_to_digit(route_type: int):
     if 0 <= route_type <= 9:
         return route_type
     elif 100 <= route_type <= 199:  # rail service
@@ -174,9 +181,8 @@ def convert_gtfs_to_digit(route_type):
         raise ValueError(f"Unknown route type: {route_type}")
 
 
-def get_route_color(route_type: int) -> Color:
-    route_type = convert_gtfs_to_digit(route_type)
-    match route_type:
+def get_route_color(simple_route_type: int) -> Color:
+    match simple_route_type:
         case 7:
             return Color(0.97, 0.38, 0.75)  # funicular
         case 6:
@@ -194,9 +200,9 @@ def get_route_color(route_type: int) -> Color:
         case 0:
             return Color(0.1, 0.46, 0.82)  # tram
         case 15:
-            return HexColor("#020079")  # water transport
+            return HexColor("#1055b5")  # water transport
         case _:
-            raise ValueError(f"Unknown route type: {route_type}")
+            raise ValueError(f"Unknown route type: {simple_route_type}")
 
 
 if __name__ == "__main__":
