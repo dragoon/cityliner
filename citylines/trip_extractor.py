@@ -1,8 +1,10 @@
+import json
 import os
 import argparse
 from pathlib import Path
 import logging
 
+from citylines.osm.water import get_osm_water_bodies
 from gtfs.geo_utils import MaxDistance
 from gtfs.gtfs import GTFSDataset, BoundingBox, SegmentsDataset
 
@@ -95,4 +97,7 @@ if __name__ == "__main__":
     logger.debug("Starting to prepare data...")
     dataset = GTFSDataset.from_path(args.gtfs)
     segments = dataset.compute_segments(center_lat, center_lon, render_area, max_dist)
+    water_bodies = get_osm_water_bodies(bbox=(segments.bbox.bottom, segments.bbox.left, segments.bbox.top, segments.bbox.right))
+    with open(f'{out_dir}/water_bodies_osm.json', 'w') as f:
+        json.dump(water_bodies, f)
     create_file(out_dir, segments)
