@@ -6,10 +6,14 @@ from citylines.gtfs.gtfs import BoundingBox, coord2px
 def get_osm_water_bodies(bbox: BoundingBox):
     overpass_url = "https://overpass-api.de/api/interpreter"
     query = f"""
-    [out:json][bbox:{bbox.bottom},{bbox.left},{bbox.top},{bbox.bottom}];
-    way["natural"="water"];
-    (._;>;);
-    out;
+    [out:json][bbox:{bbox.bottom},{bbox.left},{bbox.top},{bbox.right}];
+    (
+      relation["natural"="water"]["water"~"lake|river|pond|reservoir|stream|canal"];
+      way(r:"outer");
+    );
+    out body;
+    >;
+    out skel qt;
     """
     response = requests.get(overpass_url, params={'data': query})
     data = response.json()
