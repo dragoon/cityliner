@@ -5,6 +5,34 @@ import requests
 from citylines.gtfs.gtfs import BoundingBox, coord2px
 
 
+def order_ways(ways):
+    if not ways:
+        return []
+
+    # Use the first way as the starting point
+    ordered_ways = [ways.pop(0)]
+
+    while ways:
+        # Get the last node of the current ordered way
+        last_node = ordered_ways[-1][-1]
+
+        # Find the next way that connects to this node
+        next_way_index = next((i for i, way in enumerate(ways) if way[0] == last_node or way[-1] == last_node), None)
+
+        if next_way_index is not None:
+            next_way = ways.pop(next_way_index)
+            # If the way is in the reverse direction, reverse it
+            if next_way[0] == last_node:
+                ordered_ways.append(next_way)
+            else:
+                ordered_ways.append(next_way[::-1])
+        else:
+            # If no more connecting ways, break the loop
+            break
+
+    return list(chain.from_iterable(ordered_ways))
+
+
 def get_osm_water_bodies(bbox: BoundingBox) -> list[dict]:
     overpass_url = "https://overpass-api.de/api/interpreter"
     query = f"""
@@ -36,14 +64,12 @@ def get_osm_water_bodies(bbox: BoundingBox) -> list[dict]:
     # finally reconstruct relations
     for r in data["elements"]:
         if r["type"] == "relation":
-            r_ways = []
+            r_ways_unordered = []
             for w in r["members"]:
                 if w["type"] == "way" and w["role"] == "outer":
                     if w["ref"] in way_dict:
-                        # pop from dict
-                        r_ways.append(way_dict.pop(w["ref"]))
-            # flatten
-            r_ways = list(chain.from_iterable(r_ways))
+                        r_ways_unordered.append(way_dict.pop(w["ref"]))
+            r_ways = order_ways(r_ways_unordered)
             relations.append({"name": r["tags"].get("name"), "nodes": r_ways})
     # also add other ways that were not part of relations
     for w in way_dict.values():
