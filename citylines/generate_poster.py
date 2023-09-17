@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from pdf2image import convert_from_path
 
 from reportlab.lib.pagesizes import A0
 from reportlab.pdfbase import pdfmetrics
+from reportlab.graphics.shapes import Polygon, Drawing
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
@@ -29,12 +31,15 @@ class Poster:
     def generate_single(self):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
-        c = canvas.Canvas(f"{self.name}.pdf", pagesize=(self.width, self.height))
+        c = canvas.Canvas(f"{self.name}.pdf", pagesize=(A0[0], A0[1]))
+        # reportlab measures in points, and not pixels
+        c.scale(A0[0] / self.width, A0[1] / self.height)
         c.setLineWidth(1)
         c.setFillColorRGB(0, 0, 0)
         c.rect(0, 0, self.width, self.height, fill=1)
 
         maxmin = load_lines(self.input_dir, self.city)
+        self._draw_water_bodies(c)
         self._draw_routes(c, maxmin)
 
         c.setFont("Lato", 88)
@@ -145,6 +150,35 @@ class Poster:
                             path.lineTo(x, y)
                     c.drawPath(path)
                     path.close()
+        c.restoreState()
+
+    def _draw_water_bodies(self, c):
+        c.saveState()
+        c.translate(self.width / 2, self.height / 2)
+        c.scale(1, -1)
+
+        with open(self.input_dir / self.city / "water_bodies_osm.json", 'r') as f:
+            water_bodies = json.load(f)
+
+        c.setDash([])
+        c.setLineWidth(5)
+        c.setStrokeColor(Color(0, 0, 1))
+        canvas_width = c._pagesize[0]
+        canvas_height = c._pagesize[1]
+
+        # Create a Drawing with the same size as the Canvas
+        d = Drawing(canvas_width, canvas_height)
+        for body in water_bodies:
+            points = []
+            for index, point in enumerate(body["nodes"]):
+                x, y = point["x"], point["y"]
+                points.append(x)
+                points.append(y)
+            # Add a Polygon or any other shapes to the Drawing
+            polygon = Polygon(points, fillColor='#0e142a')
+            d.add(polygon)
+        renderPDF.draw(d, c, 0, 0)
+
         c.restoreState()
 
 
