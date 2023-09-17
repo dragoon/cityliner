@@ -19,6 +19,57 @@ from svglib.svglib import svg2rlg
 
 
 @dataclass
+class ColorScheme:
+    funicular_cable_gondola: str
+    ferry_water: str
+    bus: str
+    rail: str
+    subway: str
+    tram: str
+
+
+# Default Scheme
+default_scheme = ColorScheme(
+    funicular_cable_gondola="#F761BF",
+    ferry_water="#FF8000",
+    bus="#E31B1C",
+    rail="#708A91",
+    subway="#4DAF4A",
+    tram="#1A75D1"
+)
+
+# Pastel Scheme
+pastel_scheme = ColorScheme(
+    funicular_cable_gondola="#FFA8D8",
+    ferry_water="#FFAB85",
+    bus="#FF9999",
+    rail="#A6A6A6",
+    subway="#98E2A2",
+    tram="#99CCFF"
+)
+
+# Earthy Scheme
+earthy_scheme = ColorScheme(
+    funicular_cable_gondola="#E89005",
+    ferry_water="#55AA77",
+    bus="#B36500",
+    rail="#5D5D5D",
+    subway="#44BB44",
+    tram="#3377AA"
+)
+
+# Cool Scheme
+cool_scheme = ColorScheme(
+    funicular_cable_gondola="#8E2DE2",
+    ferry_water="#2193B0",
+    bus="#C32BAD",
+    rail="#5D5DAA",
+    subway="#4DFFB3",
+    tram="#6761A8"
+)
+
+
+@dataclass
 class Poster:
     width: int
     height: int
@@ -118,7 +169,7 @@ class Poster:
 
                 for route_type in route_types:
                     simple_route_type = convert_gtfs_to_digit(int(route_type))
-                    color = get_route_color(simple_route_type)
+                    color = get_route_color(simple_route_type, pastel_scheme)
                     points = line[2].split(",")
 
                     factor = 1.7
@@ -215,26 +266,26 @@ def convert_gtfs_to_digit(route_type: int):
         raise ValueError(f"Unknown route type: {route_type}")
 
 
-def get_route_color(simple_route_type: int) -> Color:
+def get_route_color(simple_route_type: int, color_scheme: ColorScheme) -> Color:
     match simple_route_type:
         case 7:
-            return Color(0.97, 0.38, 0.75)  # funicular
+            return HexColor(color_scheme.funicular_cable_gondola)
         case 6:
-            return Color(0.65, 0.33, 0.16)  # gondola
+            return HexColor(color_scheme.funicular_cable_gondola)
         case 5:
-            return Color(1, 1, 0.2)  # cable car
+            return HexColor(color_scheme.funicular_cable_gondola)
         case 4:
-            return Color(1, 0.5, 0)  # ferry
+            return HexColor(color_scheme.ferry_water)
         case 3:
-            return Color(0.89, 0.1, 0.11)  # bus
+            return HexColor(color_scheme.bus)
         case 2:
-            return Color(0.44, 0.53, 0.57)  # rail, inter-city
+            return HexColor(color_scheme.rail)
         case 1:
-            return Color(0.3, 0.69, 0.29)  # subway, metro
+            return HexColor(color_scheme.subway)
         case 0:
-            return Color(0.1, 0.46, 0.82)  # tram
+            return HexColor(color_scheme.tram)
         case 15:
-            return HexColor("#1055b5")  # water transport
+            return HexColor(color_scheme.ferry_water)
         case _:
             raise ValueError(f"Unknown route type: {simple_route_type}")
 
