@@ -12,6 +12,7 @@ def get_osm_water_bodies(bbox: BoundingBox) -> list[dict]:
     (
       relation["natural"="water"]["water"~"lake|river|pond|reservoir|stream|canal"];
       way(r);
+      way["natural"="water"]["water"~"lake|river|pond|reservoir|stream|canal"];
     );
     out tags body;
     >;
@@ -39,9 +40,13 @@ def get_osm_water_bodies(bbox: BoundingBox) -> list[dict]:
             for w in r["members"]:
                 if w["type"] == "way" and w["role"] == "outer":
                     if w["ref"] in way_dict:
-                        r_ways.append(way_dict[w["ref"]])
+                        # pop from dict
+                        r_ways.append(way_dict.pop(w["ref"]))
             # flatten
             r_ways = list(chain.from_iterable(r_ways))
             relations.append({"name": r["tags"].get("name"), "nodes": r_ways})
+    # also add other ways that were not part of relations
+    for w in way_dict.values():
+        relations.append({"name": "water-unnamed", "nodes": w})
 
     return relations
