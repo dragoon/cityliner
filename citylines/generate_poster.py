@@ -181,15 +181,17 @@ class Poster:
                     alph = 100 * (float(trips) / maxmin)
                     if alph < 20.0:
                         alph = 20.0
-                    color_alpha = Color(color.red, color.green, color.blue, alph / 255.0)
 
-                    c.setStrokeColor(color_alpha)
                     c.setLineCap(2)  # square
 
                     if simple_route_type == 15:
                         # water transport
-                        c.setDash(50, 50)
+                        c.setDash(10, 30)
+                        color_alpha = Color(color.red, color.green, color.blue, 0.4)
+                        c.setStrokeColor(color_alpha)
                     else:
+                        color_alpha = Color(color.red, color.green, color.blue, alph / 255.0)
+                        c.setStrokeColor(color_alpha)
                         c.setDash([])
 
                     path = c.beginPath()
@@ -212,8 +214,6 @@ class Poster:
             water_bodies = json.load(f)
 
         c.setDash([])
-        c.setLineWidth(5)
-        c.setStrokeColor(Color(0, 0, 1))
         canvas_width = c._pagesize[0]
         canvas_height = c._pagesize[1]
 
