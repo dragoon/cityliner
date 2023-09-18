@@ -15,6 +15,7 @@ from reportlab.graphics import renderPDF
 from reportlab.lib.colors import Color, HexColor
 import math
 
+from reportlab.pdfgen.canvas import Canvas
 from svglib.svglib import svg2rlg
 
 
@@ -79,6 +80,16 @@ class Poster:
     city: str
     logos: list[str]
 
+    def _draw_logos(self, c: Canvas):
+        gap_pt = 70
+        target_logo_h = 564
+        total_w = 0
+        for logo in self.logos:
+            provider_w, _ = self._draw_svg_on_pdf(c, f"assets/logos/{self.city}/{logo}", 200 + total_w,
+                                                  100, height=target_logo_h)
+            total_w += provider_w + gap_pt
+        return total_w
+
     def generate_single(self):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
@@ -94,12 +105,7 @@ class Poster:
         self._draw_routes(c, maxmin)
 
         c.setFont("Lato", 88)
-        provider_h = 564
-        total_w = 0
-        for logo in self.logos:
-            provider_w, provider_h = self._draw_svg_on_pdf(c, f"assets/logos/{self.city}/{logo}", 200 + total_w,
-                                                           100, height=provider_h)
-            total_w += provider_w + 50  # 50 is gap
+        total_w = self._draw_logos(c)
 
         gray_value = 200 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
