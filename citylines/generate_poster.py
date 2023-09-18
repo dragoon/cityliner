@@ -41,7 +41,7 @@ default_scheme = ColorScheme(
 # Pastel Scheme
 pastel_scheme = ColorScheme(
     funicular_cable_gondola="#FFA8D8",
-    ferry_water="#FFAB85",
+    ferry_water="#85acff",
     bus="#FF9999",
     rail="#A6A6A6",
     subway="#98E2A2",
@@ -293,6 +293,6 @@ def get_route_color(simple_route_type: int, color_scheme: ColorScheme) -> Color:
 if __name__ == "__main__":
     p = Poster(9933, 14043, name="zurich", out_dir=Path("./posters"),
                input_dir=Path("./processed"), city="zurich",
-               logos=["zurich_coat_of_arms_text.svg"])
+               logos=["zurich_coat_of_arms.svg", "kanton_zurich.svg"])
     p.generate_single()
     # p.apply_fade_effect()
