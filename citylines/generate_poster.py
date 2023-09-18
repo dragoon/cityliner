@@ -49,6 +49,15 @@ pastel_scheme = ColorScheme(
     tram="#99CCFF"
 )
 
+inferno_scheme = ColorScheme(
+    funicular_cable_gondola="#FF5733",  # Bright Orange
+    ferry_water="#C70039",  # Dark Red
+    bus="#FFC300",  # Bright Yellow
+    rail="#DAF7A6",  # Pale Green
+    subway="#581845",  # Dark Purple
+    tram="#900C3F"  # Dark Magenta
+)
+
 # Earthy Scheme
 earthy_scheme = ColorScheme(
     funicular_cable_gondola="#E89005",
@@ -175,7 +184,7 @@ class Poster:
 
                 for route_type in route_types:
                     simple_route_type = convert_gtfs_to_digit(int(route_type))
-                    color = get_route_color(simple_route_type, pastel_scheme)
+                    color = get_route_color(simple_route_type, inferno_scheme)
                     points = line[2].split(",")
 
                     factor = 1.7
