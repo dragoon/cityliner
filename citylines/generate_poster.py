@@ -235,14 +235,17 @@ class Poster:
         # Create a Drawing with the same size as the Canvas
         d = Drawing(canvas_width, canvas_height)
         for body in water_bodies:
-            points = []
-            for index, point in enumerate(body["nodes"]):
-                x, y = point["x"], point["y"]
-                points.append(x)
-                points.append(y)
+            points = [coord for point in body["nodes"] for coord in (point["x"], point["y"])]
             # Add a Polygon or any other shapes to the Drawing
             polygon = Polygon(points, fillColor='#0e142a')
             d.add(polygon)
+
+            # add islands with black on top
+            if "interiors" in body:
+                for interior in body["interiors"]:
+                    int_points = [coord for point in interior for coord in (point["x"], point["y"])]
+                    polygon = Polygon(int_points, fillColor='#000000')
+                    d.add(polygon)
         renderPDF.draw(d, c, 0, 0)
 
         c.restoreState()
@@ -306,8 +309,8 @@ def get_route_color(simple_route_type: int, color_scheme: ColorScheme) -> Color:
 
 
 if __name__ == "__main__":
-    p = Poster(9933, 14043, name="zurich", out_dir=Path("./posters"),
-               input_dir=Path("./processed"), city="zurich",
-               logos=["zurich_coat_of_arms.svg", "kanton_zurich.svg"])
+    p = Poster(9933, 14043, name="helsinki", out_dir=Path("./posters"),
+               input_dir=Path("./processed"), city="helsinki",
+               logos=["helsinki.svg", "hsl.svg"])
     p.generate_single()
     # p.apply_fade_effect()
