@@ -4,6 +4,12 @@ from shapely.geometry import box
 from citylines.gtfs.gtfs import BoundingBox, coord2px
 
 
+def process_polygon(polygon, bbox_orig: BoundingBox):
+    exterior_nodes = [coord2px(lat, lon, bbox_orig) for lon, lat in polygon.exterior.coords]
+    interiors = [[coord2px(lat, lon, bbox_orig) for lon, lat in interior.coords] for interior in polygon.interiors]
+    return {"nodes": exterior_nodes, "name": "ocean", "interiors": interiors}
+
+
 def get_ocean_water_bodies(bbox_orig: BoundingBox):
     # Load the Natural Earth Data
     water_gdf = gpd.read_file('oceans/oceans-osm/water_polygons.shp')
@@ -16,22 +22,10 @@ def get_ocean_water_bodies(bbox_orig: BoundingBox):
 
     # Initialize the result dictionary with an empty list for nodes
     result = []
-
-    # Loop through each geometry in the filtered GeoDataFrame
     for geometry in filtered_water_gdf.geometry:
         if geometry.geom_type == 'Polygon':
-            polygon_nodes = []
-            for lon, lat in geometry.exterior.coords:
-                polygon_nodes.append(coord2px(lat, lon, bbox_orig))
-            result.append({"nodes": polygon_nodes, "name": "ocean"})
+            result.append(process_polygon(geometry, bbox_orig))
         elif geometry.geom_type == 'MultiPolygon':
             for polygon in geometry:
-                exterior_nodes = []
-                interior_nodes = []
-                for lon, lat in polygon.exterior.coords:
-                    exterior_nodes.append(coord2px(lat, lon, bbox_orig))
-
-                for lon, lat in polygon.exterior.coords:
-                    interior_nodes.append(coord2px(lat, lon, bbox_orig))
-                result.append({"nodes": exterior_nodes, "name": "ocean", "interior": interior_nodes})
+                result.append(process_polygon(polygon, bbox_orig))
     return result
