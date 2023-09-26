@@ -18,13 +18,13 @@ import math
 from reportlab.pdfgen.canvas import Canvas
 from svglib.svglib import svg2rlg
 
+from citylines.gtfs.domain import RenderArea
 from citylines.util.colors import inferno_scheme, ColorScheme
 
 
 @dataclass
 class Poster:
-    width: int
-    height: int
+    render_area: RenderArea
     name: str
     out_dir: Path
     input_dir: Path
@@ -46,10 +46,10 @@ class Poster:
 
         c = canvas.Canvas(f"{self.name}.pdf", pagesize=(A0[0], A0[1]))
         # reportlab measures in points, and not pixels
-        c.scale(A0[0] / self.width, A0[1] / self.height)
+        c.scale(A0[0] / self.render_area.width_px, A0[1] / self.render_area.height_px)
         c.setLineWidth(1)
         c.setFillColorRGB(0, 0, 0)
-        c.rect(0, 0, self.width, self.height, fill=1)
+        c.rect(0, 0, self.render_area.width_px, self.render_area.height_px, fill=1)
 
         if add_water:
             self._draw_water_bodies(c)
@@ -68,8 +68,8 @@ class Poster:
                 c.drawString(total_w + 250, start + i * 140, line.strip())
 
         # Adding additional text on the poster
-        c.drawRightString(self.width - 200, 260, "Generated on cityliner.io.")
-        c.drawRightString(self.width - 200, 120,
+        c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")
+        c.drawRightString(self.render_area.width_px - 200, 120,
                           "License for personal use only. Redistribution or commercial use is prohibited.")
 
         c.showPage()
@@ -92,14 +92,14 @@ class Poster:
     def apply_fade_effect(self):
         out_path = self._convert_pdf_to_png()
         image = Image.open(out_path)
-        fade_distance = int(min(self.width, self.height) / 10)
-        mask = Image.new('L', (self.width, self.height), 255)
+        fade_distance = int(min(self.render_area.width_px, self.render_area.height_px) / 10)
+        mask = Image.new('L', (self.render_area.width_px, self.render_area.height_px), 255)
 
         draw = ImageDraw.Draw(mask)
 
         for i in range(fade_distance):
             alpha = int(255 * (i / fade_distance))
-            draw.rectangle((i, i, self.width - i, self.height - i), outline=alpha)
+            draw.rectangle((i, i, self.render_area.width_px - i, self.render_area.height_px - i), outline=alpha)
 
         # Ensure that image and backdrop image are in the same mode (either RGB or RGBA)
         backdrop_image = Image.new(image.mode, image.size, (0, 0, 0, 255))
@@ -121,7 +121,7 @@ class Poster:
     def _draw_routes(self, c):
         max_lines = self.get_max_lines()
         c.saveState()
-        c.translate(self.width / 2, self.height / 2)
+        c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
         c.scale(1, -1)
 
         with open(self.input_dir / self.city / "data.lines", 'r') as file:
@@ -170,7 +170,7 @@ class Poster:
 
     def _draw_water_bodies(self, c):
         c.saveState()
-        c.translate(self.width / 2, self.height / 2)
+        c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
         c.scale(1, -1)
 
         with open(self.input_dir / self.city / "water_bodies_osm.json", 'r') as f:
@@ -248,11 +248,3 @@ def get_route_color(simple_route_type: int, color_scheme: ColorScheme) -> Color:
             return HexColor(color_scheme.ferry_water)
         case _:
             raise ValueError(f"Unknown route type: {simple_route_type}")
-
-
-if __name__ == "__main__":
-    p = Poster(9933, 14043, name="helsinki", out_dir=Path("./posters"),
-               input_dir=Path("./processed"), city="helsinki",
-               logos=["helsinki.svg", "hsl.svg"])
-    p.generate_single(add_water=True)
-    # p.apply_fade_effect()
