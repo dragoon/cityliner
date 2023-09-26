@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, Tuple
 
 import csv
+from smart_open import open
 
 from citylines.gtfs.domain import Point, SegmentsDataset, BoundingBox, RenderArea
 from citylines.gtfs.geo_utils import is_allowed_point, MaxDistance
@@ -13,10 +14,10 @@ from citylines.gtfs.geo_utils import is_allowed_point, MaxDistance
 
 @dataclass(frozen=True)
 class GTFSDataset:
-    gtfs_folder_path: Path
+    gtfs_folder_path: str
 
     def _parse_routes(self) -> Iterable:
-        with open(self.gtfs_folder_path / "routes.txt", 'r', newline='', encoding='utf-8') as file:
+        with open(f"{self.gtfs_folder_path}/routes.txt", 'r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 route_id = row["route_id"]
@@ -24,7 +25,7 @@ class GTFSDataset:
                 yield route_id, route_type
 
     def _parse_trips(self) -> Iterable:
-        with open(self.gtfs_folder_path / "trips.txt", 'r', newline='', encoding='utf-8') as file:
+        with open(f"{self.gtfs_folder_path}/trips.txt", 'r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 shape_id = row["shape_id"]
@@ -32,7 +33,7 @@ class GTFSDataset:
                 yield shape_id, route_id
 
     def _parse_shapes(self) -> Iterable:
-        with open(self.gtfs_folder_path / "shapes.txt", 'r', newline='', encoding='utf-8') as file:
+        with open(f"{self.gtfs_folder_path}/shapes.txt", 'r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 shape_id = row["shape_id"]
@@ -144,10 +145,13 @@ class GTFSDataset:
 
     @staticmethod
     def from_path(gtfs_folder: str) -> 'GTFSDataset':
-        required_file = Path(gtfs_folder) / "shapes.txt"
-        if not required_file.exists():
+        try:
+            required_file = f"{gtfs_folder}/shapes.txt"
+            with open(required_file, "r"):
+                pass
+        except IOError:
             raise ValueError(f"{required_file} does not exist")
-        return GTFSDataset(Path(gtfs_folder))
+        return GTFSDataset(gtfs_folder)
 
 
 def get_route_type_for_shape_id(shape_id, route_types):
