@@ -41,7 +41,7 @@ class Poster:
             total_w += provider_w + gap_pt
         return total_w
 
-    def generate_single(self):
+    def generate_single(self, add_water: bool = False):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
         c = canvas.Canvas(f"{self.name}.pdf", pagesize=(A0[0], A0[1]))
@@ -51,9 +51,9 @@ class Poster:
         c.setFillColorRGB(0, 0, 0)
         c.rect(0, 0, self.width, self.height, fill=1)
 
-        maxmin = load_lines(self.input_dir, self.city)
-        self._draw_water_bodies(c)
-        self._draw_routes(c, maxmin)
+        if add_water:
+            self._draw_water_bodies(c)
+        self._draw_routes(c)
 
         c.setFont("Lato", 88)
         total_w = self._draw_logos(c)
@@ -113,7 +113,13 @@ class Poster:
         images[0].save(out_path, 'PNG')
         return out_path
 
-    def _draw_routes(self, c, maxmin: float):
+    def get_max_lines(self) -> float:
+        with open(self.input_dir / self.city / "maxmin.lines", 'r') as file:
+            max_val = float(file.readline().strip())
+            return max_val
+
+    def _draw_routes(self, c):
+        max_lines = self.get_max_lines()
         c.saveState()
         c.translate(self.width / 2, self.height / 2)
         c.scale(1, -1)
@@ -125,7 +131,7 @@ class Poster:
                 route_types = line[1].split(",")
 
                 for route_type in route_types:
-                    simple_route_type = convert_gtfs_to_digit(int(route_type))
+                    simple_route_type = to_simple_gtfs_type(int(route_type))
                     color = get_route_color(simple_route_type, inferno_scheme)
                     points = line[2].split(",")
 
@@ -135,7 +141,7 @@ class Poster:
                         stroke_weight = 1.0 * factor
 
                     c.setLineWidth(stroke_weight)
-                    alph = 100 * (float(trips) / maxmin)
+                    alph = 100 * (float(trips) / max_lines)
                     if alph < 20.0:
                         alph = 20.0
 
@@ -193,13 +199,7 @@ class Poster:
         c.restoreState()
 
 
-def load_lines(input_dir: Path, city) -> float:
-    with open(input_dir / city / "maxmin.lines", 'r') as file:
-        max_val = float(file.readline().strip())
-        return max_val
-
-
-def convert_gtfs_to_digit(route_type: int):
+def to_simple_gtfs_type(route_type: int):
     if 0 <= route_type <= 9:
         return route_type
     elif 100 <= route_type <= 199:  # rail service
@@ -254,5 +254,5 @@ if __name__ == "__main__":
     p = Poster(9933, 14043, name="helsinki", out_dir=Path("./posters"),
                input_dir=Path("./processed"), city="helsinki",
                logos=["helsinki.svg", "hsl.svg"])
-    p.generate_single()
+    p.generate_single(add_water=True)
     # p.apply_fade_effect()
