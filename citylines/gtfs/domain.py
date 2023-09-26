@@ -6,6 +6,10 @@ class RenderArea:
     width_px: int
     height_px: int
 
+    @staticmethod
+    def poster() -> 'RenderArea':
+        return RenderArea(width_px=9933, height_px=14043)
+
 
 @dataclass(frozen=True)
 class Point:

@@ -79,7 +79,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     center_lat, center_lon = map(float, args.center.split(","))
     if args.poster:
-        render_area = RenderArea(width_px=9933, height_px=14043)
+        render_area = RenderArea.poster()
     else:
         render_area = RenderArea(args.size, args.size)
     process_gtfs_trips(center_point=Point(center_lat, center_lon), out_dir=args.out, gtfs_dir=args.gtfs,
