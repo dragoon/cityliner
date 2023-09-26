@@ -1,13 +1,13 @@
 import json
 import os
 import argparse
-from pathlib import Path
 import logging
 
+from citylines.gtfs.domain import RenderArea
 from citylines.water.oceans import get_ocean_water_bodies
 from citylines.water.osm import get_osm_water_bodies
-from gtfs.geo_utils import MaxDistance
-from gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px
+from gtfs.geo_utils import MaxDistance, Distance
+from gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px, Point
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
@@ -46,56 +46,40 @@ def create_file(out_dir: str, seg: SegmentsDataset):
     logger.info("Write complete")
 
 
+def process_gtfs_trips(center_point: Point, out_dir: str, gtfs_dir: str, max_dist_y: Distance, render_area: RenderArea):
+    max_dist = MaxDistance.from_distance(max_dist_y, render_area)
+
+    logger.debug(f"GTFS provider: {gtfs_dir}")
+    logger.debug(f"Render area: {render_area.width_px} x {render_area.height_px} px")
+    logger.debug(f"Center coordinates: {center_point}")
+    logger.debug(f"Max distance from center: {max_dist.x}x{max_dist.y}km")
+
+    logger.debug("Starting to prepare data...")
+    dataset = GTFSDataset.from_path(gtfs_dir)
+    segments = dataset.compute_segments(center_point, render_area, max_dist)
+    water_bodies = get_osm_water_bodies(bbox=segments.bbox)
+    water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
+    with open(f'{out_dir}/water_bodies_osm.json', 'w') as f:
+        json.dump(water_bodies, f)
+    create_file(out_dir, segments)
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
-    parser.add_argument('--verbose', '-v', action='count', default=1)
     parser.add_argument('--gtfs', required=True, help='Path to the gtfs directory')
-    parser.add_argument('--out',  required=True, help="Path to the output directory (will be created if doesn't exist)")
+    parser.add_argument('--out', required=True, help="Path to the output directory (will be created if doesn't exist)")
     parser.add_argument('--max-dist', type=float, default=20.0, help='Maximum distance from the center on y axis')
     parser.add_argument('--size', type=int, default=5000, help='Size of the output drawing in px')
     parser.add_argument('--center', help='Coordinates of the center')
     parser.add_argument('--poster', action='store_true', help='Make drawing for A0 poster size')
 
     args = parser.parse_args()
-    if args.verbose >= 2:
-        logger.setLevel(logging.DEBUG)
-    elif args.verbose == 1:
-        logger.setLevel(logging.INFO)
-    else:
-        logger.setLevel(logging.WARNING)
-
-    render_area_a0 = {'width': 9933, 'height': 14043}
-    center_lat = None
-    center_lon = None
-    out_dir = args.out
-
-    if args.center:
-        center_lat, center_lon = map(float, args.center.split(","))
-
+    logger.setLevel(logging.DEBUG)
+    center_lat, center_lon = map(float, args.center.split(","))
     if args.poster:
-        render_area = render_area_a0
+        render_area = RenderArea(width_px=9933, height_px=14043)
     else:
-        render_area = {'width': args.size, 'height': args.size}
-
-    max_dist = MaxDistance(args.max_dist * render_area['width'] / render_area['height'], args.max_dist)
-
-    logger.debug(f"GTFS provider: {args.gtfs}")
-    logger.debug(f"Render area: {render_area['width']} x {render_area['height']} px")
-    if args.center:
-        logger.debug(f"Center coordinates: {center_lat}, {center_lon}")
-    logger.debug(f"Max distance from center: {max_dist.x}x{max_dist.y}km")
-
-    required_file = Path(args.gtfs) / "shapes.txt"
-    if not required_file.exists():
-        print(f"\nERROR: {required_file} does not exist.\nExiting.\n")
-        exit(1)
-
-    logger.debug("Starting to prepare data...")
-    dataset = GTFSDataset.from_path(args.gtfs)
-    segments = dataset.compute_segments(center_lat, center_lon, render_area, max_dist)
-    water_bodies = get_osm_water_bodies(bbox=segments.bbox)
-    water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
-    with open(f'{out_dir}/water_bodies_osm.json', 'w') as f:
-        json.dump(water_bodies, f)
-    create_file(out_dir, segments)
+        render_area = RenderArea(args.size, args.size)
+    process_gtfs_trips(center_point=Point(center_lat, center_lon), out_dir=args.out, gtfs_dir=args.gtfs,
+                       max_dist_y=Distance.from_km(args.max_dist), render_area=render_area)

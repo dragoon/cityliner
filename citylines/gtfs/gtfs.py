@@ -7,50 +7,8 @@ from typing import Iterable, Tuple
 
 import csv
 
+from citylines.gtfs.domain import Point, SegmentsDataset, BoundingBox, RenderArea
 from citylines.gtfs.geo_utils import is_allowed_point, MaxDistance
-
-
-@dataclass(frozen=True)
-class BoundingBox:
-    left: float
-    right: float
-    top: float
-    bottom: float
-    center_lat: float
-    center_lon: float
-    render_area: dict
-
-    @property
-    def width(self):
-        return self.right - self.left
-
-    @property
-    def height(self):
-        return self.top - self.bottom
-
-    @property
-    def aspect_ratio(self):
-        return self.width / self.height
-
-    @property
-    def canvas_aspect_ratio(self):
-        return self.render_area["width"] / self.render_area["height"]
-
-    @property
-    def scale_factor_lat(self):
-        return self.render_area["height"] / max(abs(self.center_lat - self.top), abs(self.center_lat - self.bottom))
-
-    @property
-    def scale_factor_lon(self):
-        return self.render_area["width"] / max(abs(self.center_lon - self.left), abs(self.center_lon - self.right))
-
-
-@dataclass(frozen=True)
-class SegmentsDataset:
-    segments: list[dict]
-    bbox: BoundingBox
-    max_trips_per_seg: int
-    min_trips_per_seg: int
 
 
 @dataclass(frozen=True)
@@ -109,24 +67,21 @@ class GTFSDataset:
         logging.debug("Finished trip iteration")
         return route_types, trips_on_a_shape
 
-    def _get_sequences(self, center_lat: float | None, center_lon: float | None, max_dist: MaxDistance) -> dict:
+    def _get_sequences(self, center_point: Point, max_dist: MaxDistance) -> dict:
         logging.debug("Starting shape iteration...")
         sequences = defaultdict(dict)
         for shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, shape_row in self._parse_shapes():
             # check out of boundaries
-            if center_lat and center_lon:
-                if is_allowed_point(float(shape_pt_lat), float(shape_pt_lon), center_lat, center_lon, max_dist):
-                    sequences[shape_id][shape_pt_sequence] = shape_row
-            else:
+            if is_allowed_point(Point(float(shape_pt_lat), float(shape_pt_lon)), center_point, max_dist):
                 sequences[shape_id][shape_pt_sequence] = shape_row
 
         logging.debug("Finished shape iteration")
         return sequences
 
-    def compute_segments(self, center_lat: float | None, center_lon: float | None, render_area: dict,
+    def compute_segments(self, center: Point, render_area: RenderArea,
                          max_dist: MaxDistance) -> SegmentsDataset:
         route_types, trips_on_a_shape = self._get_trips_and_routes()
-        sequences = self._get_sequences(center_lat, center_lon, max_dist)
+        sequences = self._get_sequences(center, max_dist)
         segments = []
         max_trips, min_trips = 0, math.inf
         min_left, max_right, max_top, min_bottom = math.inf, 0, 0, math.inf
@@ -183,12 +138,15 @@ class GTFSDataset:
                                            top=max_top,
                                            bottom=min_bottom,
                                            render_area=render_area,
-                                           center_lat=center_lat,
-                                           center_lon=center_lon), max_trips,
+                                           center=center
+                                           ), max_trips,
                                min_trips)
 
     @staticmethod
     def from_path(gtfs_folder: str) -> 'GTFSDataset':
+        required_file = Path(gtfs_folder) / "shapes.txt"
+        if not required_file.exists():
+            raise ValueError(f"{required_file} does not exist")
         return GTFSDataset(Path(gtfs_folder))
 
 
@@ -210,6 +168,6 @@ def get_route_type_for_shape_id(shape_id, route_types):
 
 
 def coord2px(lat: float, lng: float, bbox: BoundingBox):
-    coord_x = bbox.width/2 + (lng - bbox.center_lon) * bbox.scale_factor_lon
-    coord_y = bbox.height/2 - (lat - bbox.center_lat) * bbox.scale_factor_lat
+    coord_x = bbox.width / 2 + (lng - bbox.center.lon) * bbox.scale_factor_lon
+    coord_y = bbox.height / 2 - (lat - bbox.center.lat) * bbox.scale_factor_lat
     return {'x': int(coord_x), 'y': int(coord_y)}
