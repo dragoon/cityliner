@@ -54,9 +54,10 @@ def process_gtfs_trips(center_point: Point, out_dir: str, gtfs_dir: str, max_dis
     logger.debug(f"Center coordinates: {center_point}")
     logger.debug(f"Max distance from center: {max_dist.x}x{max_dist.y}km")
 
-    logger.debug("Starting to prepare data...")
+    logger.debug("Computing GTFS segments data...")
     dataset = GTFSDataset.from_path(gtfs_dir)
     segments = dataset.compute_segments(center_point, render_area, max_dist)
+    logger.debug("Extracting water bodies ...")
     water_bodies = get_osm_water_bodies(bbox=segments.bbox)
     water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
     with open(f'{out_dir}/water_bodies_osm.json', 'w') as f:
