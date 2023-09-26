@@ -145,8 +145,8 @@ class GTFSDataset:
 
     @staticmethod
     def from_path(gtfs_folder: str) -> 'GTFSDataset':
+        required_file = f"{gtfs_folder}/shapes.txt"
         try:
-            required_file = f"{gtfs_folder}/shapes.txt"
             with open(required_file, "r"):
                 pass
         except IOError:
