@@ -14,7 +14,7 @@ if __name__ == "__main__":
     parser.add_argument('--out', required=True, help="Path to the output directory (will be created if doesn't exist)")
     parser.add_argument('--max-dist', type=float, default=20.0, help='Maximum distance from the center on y axis')
     parser.add_argument('--size', type=int, default=5000, help='Size of the output drawing in px')
-    parser.add_argument('--add-water', type=bool, default=True, help='Add water bodies on poster')
+    parser.add_argument('--water', action='store_true', help='Add water bodies on poster')
     parser.add_argument('--center', help='Coordinates of the center')
     parser.add_argument('--poster', action='store_true', help='Make drawing for A0 poster size')
 
@@ -38,5 +38,5 @@ if __name__ == "__main__":
     p = Poster(render_area, name="helsinki", out_dir=Path("./posters"),
                input_dir=Path("./processed"), city="helsinki",
                logos=["helsinki.svg", "hsl.svg"])
-    p.generate_single(add_water=args.add_water)
+    p.generate_single(add_water=args.water)
     # p.apply_fade_effect()
