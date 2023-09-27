@@ -100,7 +100,9 @@ if __name__ == "__main__":
 
     for name, place_config in PLACE_CONFIGS.items():
         render_area = RenderArea.poster()
+        logger.info(f"Processing {name}")
         for max_dist in place_config["distances"]:
+            logger.info(f"Distance: {max_dist}")
             out_dir = f"./processed/{name}/{max_dist.replace('.', '_')}"
 
             process_gtfs_trips(center_point=place_config["center"],
