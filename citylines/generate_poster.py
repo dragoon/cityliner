@@ -19,13 +19,12 @@ from reportlab.pdfgen.canvas import Canvas
 from svglib.svglib import svg2rlg
 
 from citylines.gtfs.domain import RenderArea
-from citylines.util.colors import inferno_scheme, ColorScheme
+from citylines.util.colors import ColorScheme
 
 
 @dataclass
 class Poster:
     render_area: RenderArea
-    name: str
     out_dir: Path
     input_dir: Path
     city: str
@@ -41,10 +40,10 @@ class Poster:
             total_w += provider_w + gap_pt
         return total_w
 
-    def generate_single(self, add_water: bool = False):
+    def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
-        c = canvas.Canvas(f"{self.name}.pdf", pagesize=(A0[0], A0[1]))
+        c = canvas.Canvas(f"{self.city}.pdf", pagesize=(A0[0], A0[1]))
         # reportlab measures in points, and not pixels
         c.scale(A0[0] / self.render_area.width_px, A0[1] / self.render_area.height_px)
         c.setLineWidth(1)
@@ -53,7 +52,7 @@ class Poster:
 
         if add_water:
             self._draw_water_bodies(c)
-        self._draw_routes(c)
+        self._draw_routes(c, color_scheme)
 
         c.setFont("Lato", 88)
         total_w = self._draw_logos(c)
@@ -107,24 +106,24 @@ class Poster:
         faded_image.save(out_path)
 
     def _convert_pdf_to_png(self):
-        images = convert_from_path(self.out_dir / f"{self.name}.pdf")
+        images = convert_from_path(self.out_dir / f"{self.city}.pdf")
         # Assuming the PDF has one page
-        out_path = self.out_dir / f"{self.name}.png"
+        out_path = self.out_dir / f"{self.city}.png"
         images[0].save(out_path, 'PNG')
         return out_path
 
     def get_max_lines(self) -> float:
-        with open(self.input_dir / self.city / "maxmin.lines", 'r') as file:
+        with open(self.input_dir / "maxmin.lines", 'r') as file:
             max_val = float(file.readline().strip())
             return max_val
 
-    def _draw_routes(self, c):
+    def _draw_routes(self, c: Canvas, color_scheme: ColorScheme):
         max_lines = self.get_max_lines()
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
         c.scale(1, -1)
 
-        with open(self.input_dir / self.city / "data.lines", 'r') as file:
+        with open(self.input_dir / "data.lines", 'r') as file:
             for lineS in file:
                 line = lineS.split("\t")
                 trips = line[0]
@@ -132,7 +131,7 @@ class Poster:
 
                 for route_type in route_types:
                     simple_route_type = to_simple_gtfs_type(int(route_type))
-                    color = get_route_color(simple_route_type, inferno_scheme)
+                    color = get_route_color(simple_route_type, color_scheme)
                     points = line[2].split(",")
 
                     factor = 1.7
@@ -173,7 +172,7 @@ class Poster:
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
         c.scale(1, -1)
 
-        with open(self.input_dir / self.city / "water_bodies_osm.json", 'r') as f:
+        with open(self.input_dir / "water_bodies_osm.json", 'r') as f:
             water_bodies = json.load(f)
 
         c.setDash([])
