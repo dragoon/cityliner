@@ -24,31 +24,31 @@ PLACE_CONFIGS = {
     "fribourg": {
         "center": Point(46.806477, 7.161972),
         "distances": [5, 10, 20],
-        "logos": ["kanton_fribourg.svg", "fribourg_coat_of_arms.svg"],
+        "logos": ["kanton_fribourg.svg", "logo-fribourg-en.svg"],
         "gtfs": "switzerland"
     },
     "basel": {
         "center": Point(47.559601, 7.588576),
         "distances": [10, 20, 30],
-        "logos": ["kanton_basel.svg", "basel_coat_of_arms.svg"],
+        "logos": ["kanton_basel.svg"],
         "gtfs": "switzerland"
     },
-    "st. gallen": {
+    "st-gallen": {
         "center": Point(47.422258, 9.376610),
         "distances": [5, 10, 20],
-        "logos": ["kanton_st_gallen.svg", "st_gallen_coat_of_arms.svg"],
+        "logos": ["kanton_st_gallen.svg"],
         "gtfs": "switzerland"
     },
     "geneva": {
         "center": Point(46.204391, 6.143158),
         "distances": [10, 20, 30],
-        "logos": ["kanton_geneva.svg", "geneva_coat_of_arms.svg"],
+        "logos": ["kanton_geneva.svg"],
         "gtfs": "switzerland"
     },
     "lausanne": {
         "center": Point(46.519654, 6.632273),
         "distances": [10, 20, 30],
-        "logos": ["kanton_vaud.svg", "lausanne_coat_of_arms.svg"],
+        "logos": ["kanton_vaud.svg"],
         "gtfs": "switzerland"
     },
     "helsinki": {

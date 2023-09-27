@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.0"
+   width="845"
+   height="1065"
+   id="svg2444">
+  <defs
+     id="defs2459" />
+  <g
+     transform="translate(2.5,2.5)"
+     id="coat">
+    <g
+       id="background">
+      <path
+         d="M 0,0 L 0,640 C 2.8406858e-14,871.95959 188.04041,1060 420,1060 C 651.95959,1060 840,871.95959 840,640 L 840,0 L 0,0 z"
+         id="bottom"
+         style="fill:#008000;stroke:#000000;stroke-width:5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         width="835"
+         height="487.5"
+         x="2.5"
+         y="2.5"
+         id="top"
+         style="fill:#ffffff" />
+    </g>
+    <g
+       id="flag_text"
+       style="font-size:145px;font-weight:bold;text-anchor:middle;font-family:Serif">
+      <text
+         id="motto"
+         style="fill:#e0e000;stroke:#000000;stroke-width:3">
+        <tspan
+           x="420"
+           y="170"
+           id="tspan2452">LIBERTÉ</tspan>
+        <tspan
+           x="420"
+           y="290"
+           id="tspan2454"
+           style="font-size:110px">ET</tspan>
+        <tspan
+           x="420"
+           y="445"
+           id="tspan2456">PATRIE</tspan>
+      </text>
+    </g>
+  </g>
+</svg>
