@@ -109,7 +109,7 @@ if __name__ == "__main__":
                                max_dist_y=Distance.from_km(max_dist),
                                render_area=render_area)
 
-            p = Poster(render_area, out_dir=Path("./posters"),
+            p = Poster(render_area, out_path=Path(f"./posters/{name}-{max_dist.replace('.', '_')}.pdf"),
                        input_dir=Path(out_dir), city=name,
                        logos=place_config["logos"])
             p.generate_single(add_water=True, color_scheme=inferno_scheme)

@@ -25,7 +25,7 @@ from citylines.util.colors import ColorScheme
 @dataclass
 class Poster:
     render_area: RenderArea
-    out_dir: Path
+    out_path: Path
     input_dir: Path
     city: str
     logos: list[str]
@@ -43,7 +43,7 @@ class Poster:
     def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
-        c = canvas.Canvas(f"{self.city}.pdf", pagesize=(A0[0], A0[1]))
+        c = canvas.Canvas(self.out_path, pagesize=(A0[0], A0[1]))
         # reportlab measures in points, and not pixels
         c.scale(A0[0] / self.render_area.width_px, A0[1] / self.render_area.height_px)
         c.setLineWidth(1)
@@ -106,9 +106,9 @@ class Poster:
         faded_image.save(out_path)
 
     def _convert_pdf_to_png(self):
-        images = convert_from_path(self.out_dir / f"{self.city}.pdf")
+        images = convert_from_path(self.out_path)
         # Assuming the PDF has one page
-        out_path = self.out_dir / f"{self.city}.png"
+        out_path = self.out_path.with_suffix(".png")
         images[0].save(out_path, 'PNG')
         return out_path
 
