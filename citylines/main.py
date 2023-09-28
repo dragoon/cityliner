@@ -99,6 +99,13 @@ PLACE_CONFIGS = {
         "logos": ["city_of_utrecht.svg", "u-ov.svg"],
         "gtfs": "netherlands",
         "text": """Based on GTFS feed by NS\nUtrecht public transport routes"""
+    },
+    "prague": {
+        "center": Point(50.0837751, 14.4249287),
+        "distances": [30, 50],
+        "logos": ["prague.svg", "pid.svg"],
+        "gtfs": "prague",
+        "text": """Based on GTFS feed by NS\nUtrecht public transport routes"""
     }
 }
 

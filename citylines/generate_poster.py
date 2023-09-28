@@ -205,7 +205,7 @@ class Poster:
 
 
 def to_simple_gtfs_type(route_type: int):
-    if 0 <= route_type <= 9:
+    if 0 <= route_type <= 12:
         return route_type
     elif 100 <= route_type <= 199:  # rail service
         return 2  # map to rail
@@ -248,6 +248,8 @@ def get_route_color(simple_route_type: int, color_scheme: ColorScheme) -> Color:
         case 1:
             return HexColor(color_scheme.subway)
         case 0:
+            return HexColor(color_scheme.tram)
+        case 11:
             return HexColor(color_scheme.tram)
         case 15:
             return HexColor(color_scheme.ferry_water)
