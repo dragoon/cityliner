@@ -71,6 +71,10 @@ class Poster:
         c.drawRightString(self.render_area.width_px - 200, 120,
                           "License for personal use only. Redistribution or commercial use is prohibited.")
 
+        # Add city name on top
+        c.setFont("Lato", 600)
+        c.drawString(250, self.render_area.height_px - 650, self.city.title())
+
         c.showPage()
         c.save()
 
