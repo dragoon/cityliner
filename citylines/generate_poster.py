@@ -184,15 +184,17 @@ class Poster:
         for body in water_bodies:
             points = [coord for point in body["nodes"] for coord in (point["x"], point["y"])]
             # Add a Polygon or any other shapes to the Drawing
-            polygon = Polygon(points, fillColor='#0e142a')
-            d.add(polygon)
+            if len(points) > 2:
+                polygon = Polygon(points, fillColor='#0e142a')
+                d.add(polygon)
 
             # add islands with black on top
             if "interiors" in body:
                 for interior in body["interiors"]:
                     int_points = [coord for point in interior for coord in (point["x"], point["y"])]
-                    polygon = Polygon(int_points, fillColor='#000000')
-                    d.add(polygon)
+                    if len(int_points) > 2:
+                        polygon = Polygon(int_points, fillColor='#000000')
+                        d.add(polygon)
         renderPDF.draw(d, c, 0, 0)
 
         c.restoreState()
