@@ -74,7 +74,7 @@ PLACE_CONFIGS = {
     },
     "berlin": {
         "center": Point(52.52493, 13.36963),
-        "distances": [20, 30, 50],
+        "distances": [30, 50],
         "logos": ["berlin_city.svg", "bvg.svg"],
         "gtfs": "berlin",
         "text": """Based on GTFS feed by BVG\nBerlin public transport routes"""
@@ -93,7 +93,7 @@ PLACE_CONFIGS = {
         "gtfs": "netherlands",
         "text": """Based on GTFS feed by NS\nAmsterdam public transport routes"""
     },
-    "urtrecht": {
+    "utrecht": {
         "center": Point(52.0894444, 5.1077981),
         "distances": [20, 30],
         "logos": ["city_of_utrecht.svg", "u-ov.svg"],
