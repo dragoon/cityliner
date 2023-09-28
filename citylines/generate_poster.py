@@ -44,7 +44,8 @@ class Poster:
     def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
 
-        c = canvas.Canvas(self.out_path, pagesize=(A0[0], A0[1]))
+        self.out_path.parent.mkdir(parents=True, exist_ok=True)
+        c = canvas.Canvas(str(self.out_path), pagesize=(A0[0], A0[1]))
         # reportlab measures in points, and not pixels
         c.scale(A0[0] / self.render_area.width_px, A0[1] / self.render_area.height_px)
         c.setLineWidth(1)
@@ -62,7 +63,7 @@ class Poster:
         c.setFillColorRGB(gray_value, gray_value, gray_value)
         # WRITE EXTRA TEXT
         start = 120
-        for i, line in enumerate(self.text.split()):
+        for i, line in enumerate(self.text.split('\n')):
             c.drawString(total_w + 250, start + i * 140, line.strip())
 
         # Adding additional text on the poster
