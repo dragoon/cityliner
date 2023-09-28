@@ -75,9 +75,9 @@ PLACE_CONFIGS = {
     "berlin": {
         "center": Point(52.52493, 13.36963),
         "distances": [20, 30, 50],
-        "logos": ["berlin_city.svg", "bvb.svg"],
+        "logos": ["berlin_city.svg", "bvg.svg"],
         "gtfs": "berlin",
-        "text": """Based on GTFS feed by BVB\nBerlin public transport routes"""
+        "text": """Based on GTFS feed by BVG\nBerlin public transport routes"""
     },
     "hamburg": {
         "center": Point(53.552968, 10.006038),
