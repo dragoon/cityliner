@@ -19,7 +19,7 @@ PLACE_CONFIGS = {
     "bern": {
         "center": Point(46.948020, 7.447440),
         "distances": [5, 10, 20],
-        "logos": ["kanton_bern.svg", "bern_coat_of_arms.svg"],
+        "logos": ["kanton_bern.svg"],
         "gtfs": "switzerland",
         "text": """Based on GTFS feed by Swiss Federal Railways\nBern public transport routes"""
     },
