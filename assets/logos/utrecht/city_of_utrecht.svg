@@ -4,10 +4,11 @@
 <svg
    version="1.1"
    id="svg2"
-   width="205.33333"
-   height="111.59427"
-   viewBox="0 0 205.33333 111.59427"
-   sodipodi:docname="ENGELS_Gemeente_Utrecht-Logo_-pantoneUncoated AI.ai"
+   width="136.63626"
+   height="79.54583"
+   viewBox="0 0 136.63626 79.545831"
+   sodipodi:docname="city_of_utrecht.svg"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -44,36 +45,24 @@
      inkscape:showpageshadow="2"
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1" />
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="2.1148039"
+     inkscape:cx="84.877844"
+     inkscape:cy="38.77428"
+     inkscape:window-width="1920"
+     inkscape:window-height="1054"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g8" />
   <g
      id="g8"
      inkscape:groupmode="layer"
      inkscape:label="ENGELS_Gemeente_Utrecht-Logo_-pantoneUncoated AI"
-     transform="matrix(1.3333333,0,0,-1.3333333,0,111.59427)">
+     transform="matrix(1.3333333,0,0,-1.3333333,-17.852,94.366664)">
     <g
-       id="g10">
-      <g
-         id="g12"
-         clip-path="url(#clipPath16)">
-        <g
-           id="g18">
-          <g
-             id="g20" />
-          <g
-             id="g30">
-            <g
-               clip-path="url(#clipPath24)"
-               opacity="0"
-               id="g28">
-              <path
-                 d="M 154,0 H 0 v 83.696 h 154 z"
-                 style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
-                 id="path26" />
-            </g>
-          </g>
-        </g>
-      </g>
-    </g>
+       id="g10" />
     <g
        id="g32">
       <g
@@ -175,7 +164,7 @@
            id="g86"
            transform="translate(85.7937,20.655)">
           <path
-             d="M 0,0 H -1.226 V -1.589 H -2.27 v -1.18 h 1.044 v -2.724 c 0,-0.742 0.205,-1.251 0.613,-1.527 0.409,-0.276 1.082,-0.357 2.02,-0.244 v 1.101 C 1.097,-6.178 0.838,-6.18 0.63,-6.169 0.422,-6.157 0.265,-6.1 0.159,-5.998 0.053,-5.896 0,-5.728 0,-5.493 v 2.724 h 1.407 v 1.18 l -1.407,0 z"
+             d="M 0,0 H -1.226 V -1.589 H -2.27 v -1.18 h 1.044 v -2.724 c 0,-0.742 0.205,-1.251 0.613,-1.527 0.409,-0.276 1.082,-0.357 2.02,-0.244 v 1.101 C 1.097,-6.178 0.838,-6.18 0.63,-6.169 0.422,-6.157 0.265,-6.1 0.159,-5.998 0.053,-5.896 0,-5.728 0,-5.493 v 2.724 h 1.407 v 1.18 H 0 Z"
              style="fill:#ed1c24;fill-opacity:1;fill-rule:nonzero;stroke:none"
              id="path88" />
         </g>
