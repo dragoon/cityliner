@@ -28,6 +28,7 @@ class Poster:
     out_path: Path
     input_dir: Path
     city: str
+    text: str
     logos: list[str]
 
     def _draw_logos(self, c: Canvas):
@@ -59,12 +60,10 @@ class Poster:
 
         gray_value = 200 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
-        # # Loading the text file and writing the lines
-        with open(f"texts/{self.city}.txt", "r") as file:
-            lines = file.readlines()
-            start = 120
-            for i, line in enumerate(lines):
-                c.drawString(total_w + 250, start + i * 140, line.strip())
+        # WRITE EXTRA TEXT
+        start = 120
+        for i, line in enumerate(self.text.split()):
+            c.drawString(total_w + 250, start + i * 140, line.strip())
 
         # Adding additional text on the poster
         c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")

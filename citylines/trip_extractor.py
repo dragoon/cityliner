@@ -1,6 +1,6 @@
 import json
-import os
 import logging
+from pathlib import Path
 
 from citylines.gtfs.domain import RenderArea
 from citylines.water.oceans import get_ocean_water_bodies
@@ -9,15 +9,12 @@ from gtfs.geo_utils import MaxDistance, Distance
 from gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px, Point
 
 
-def create_file(out_dir: str, seg: SegmentsDataset):
-    # Create directory if it doesn't exist
-    os.makedirs(out_dir, exist_ok=True)
-
+def create_file(out_dir: Path, seg: SegmentsDataset):
     segm_length = len(seg.segments)
     logging.info("Starting to write file: data.lines")
 
     # Open the file once for writing
-    with open(os.path.join(out_dir, "data.lines"), "w", encoding="utf-8") as file:
+    with open(out_dir / "data.lines", "w", encoding="utf-8") as file:
         for idx, segment in enumerate(seg.segments):
             coords = ",".join(
                 f'{px["x"]} {px["y"]}'
@@ -33,13 +30,18 @@ def create_file(out_dir: str, seg: SegmentsDataset):
 
     # Write max and min values
     logging.info("Starting to write file: maxmin.lines")
-    with open(os.path.join(out_dir, "maxmin.lines"), "w", encoding="utf-8") as file:
+    with open(out_dir / "maxmin.lines", "w", encoding="utf-8") as file:
         file.write(f"{seg.max_trips_per_seg}\n{seg.min_trips_per_seg}")
 
     logging.info("Write complete")
 
 
-def process_gtfs_trips(center_point: Point, out_dir: str, gtfs_dir: str, max_dist_y: Distance, render_area: RenderArea):
+def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_dist_y: Distance, render_area: RenderArea):
+    if out_dir.exists():
+        logging.debug(f"Path {out_dir} already exists, skipping re-generation")
+        return
+    else:
+        out_dir.mkdir(parents=True, exist_ok=True)
     max_dist = MaxDistance.from_distance(max_dist_y, render_area)
 
     logging.debug(f"GTFS provider: {gtfs_dir}")
@@ -53,7 +55,7 @@ def process_gtfs_trips(center_point: Point, out_dir: str, gtfs_dir: str, max_dis
     logging.debug("Extracting water bodies ...")
     water_bodies = get_osm_water_bodies(bbox=segments.bbox)
     water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
-    with open(f'{out_dir}/water_bodies_osm.json', 'w') as f:
+    with open(out_dir / "water_bodies_osm.json", 'w') as f:
         json.dump(water_bodies, f)
     create_file(out_dir, segments)
 

@@ -1,2 +1,0 @@
-Saint Petersburg public transport routes
-Based on GTFS feed by the ogrp.spb.ru

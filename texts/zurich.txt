@@ -1,2 +1,0 @@
-Based on GTFS feed by Swiss Federal Railways
-Zurich public transport routes

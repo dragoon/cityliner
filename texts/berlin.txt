@@ -1,2 +1,0 @@
-Based on GTFS feed by Verkehrsverbund Berlin-Brandenburg
-Berlin public transport routes

@@ -1,2 +1,0 @@
-Based on GTFS feed by Stadtwerke Ulm/Neu-Ulm
-Ulm public transport routes
