@@ -127,6 +127,6 @@ if __name__ == "__main__":
             p = Poster(render_area, out_path=Path(f"./posters/{name}-{max_dist}.pdf"),
                        input_dir=out_dir, city=name,
                        logos=place_config["logos"],
-                       text=place_config["text"])
+                       text="")
             p.generate_single(add_water=True, color_scheme=inferno_scheme)
             # p.apply_fade_effect()
