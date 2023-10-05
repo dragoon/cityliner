@@ -1,6 +1,9 @@
 # Cityliner
 
-This repository contains a script to process GTFS data and generate visually appealing posters with customizable color schemes. Suitable for transit enthusiasts, city planners, and those looking to visualize transit data in an elegant manner.
+This project aims to create colorful visualizations from GTFS (General Transit Feed Specification) public transport datasets.
+It illustrates public transport routes on a map, where the thickness and opacity of the lines
+are determined by the frequency of the schedules along that route segment.
+Each primary mode of transportation, as defined in GTFS terms, is represented by a unique color.
 
 ## Table of Contents
 
@@ -58,16 +61,17 @@ python main.py --gtfs ./gtfs/helsinki --center 60.1706017,24.9414482 --poster --
 See configs from other cities in https://github.com/dragoon/cityliner/blob/master/citylines/process_configs.py
 
 ## Gallery
-Here are some sample posters generated using the script:
 
-![Helsinki 30km Default Scheme Poster](./sample_images/default_poster.pdf)
-*Helsinki Default Scheme Poster*
+<p align="middle">
+<img width="40%" src="gallery/zurich_30_inferno.png" alt="Zürich 30km Inferno Scheme Poster"/>
+<img width="40%" src="gallery/helsinki_30_default.png" alt="Helsinki 30km Default Scheme Poster"/>
+</p>
 
-![Tallinn 30km Pastel Scheme Poster](./sample_images/pastel_poster.pdf)
-*Tallinn Pastel Scheme Poster*
+<p align="middle">
+<img width="40%" src="gallery/tallinn_30_pastel.png" alt="Tallinn 30km Pastel Scheme Poster"/>
+<img width="40%" src="gallery/berlin_50_cool.png" alt="Berlin 50km Cool Scheme Poster"/>
+</p>
 
-![Berlin 50km Inferno Scheme Poster](./sample_images/pastel_poster.pdf)
-*Berlin Inferno Scheme Poster*
 
 ## Contribution
 
