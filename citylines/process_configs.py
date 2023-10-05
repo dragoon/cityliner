@@ -6,7 +6,7 @@ from citylines.generate_poster import Poster
 from citylines.gtfs.domain import RenderArea, Point
 from citylines.gtfs.geo_utils import Distance
 from citylines.trip_extractor import process_gtfs_trips
-from citylines.util.colors import inferno_scheme
+from citylines.util.colors import color_schemes
 
 PLACE_CONFIGS = {
     "zurich": {
@@ -14,6 +14,7 @@ PLACE_CONFIGS = {
         "distances": [20, 30, 50],
         "logos": ["kanton_zurich.svg", "zurich_coat_of_arms.svg"],
         "gtfs": "switzerland",
+        "color_scheme": "inferno",
         "text": """Based on GTFS feed by Swiss Federal Railways\nZurich public transport routes"""
     },
     "bern": {
@@ -63,6 +64,7 @@ PLACE_CONFIGS = {
         "distances": [20, 30],
         "logos": ["helsinki.svg", "hsl.svg"],
         "gtfs": "helsinki",
+        "color_scheme": "default",
         "text": """Based on GTFS feed by HSL\nHelsinki public transport routes"""
     },
     "tallinn": {
@@ -70,6 +72,7 @@ PLACE_CONFIGS = {
         "distances": [20, 30, 50],
         "logos": ["tallinn.svg", "tlt.svg"],
         "gtfs": "tallinn",
+        "color_scheme": "pastel",
         "text": """Based on GTFS feed by TLT\nTallinn public transport routes"""
     },
     "berlin": {
@@ -77,6 +80,7 @@ PLACE_CONFIGS = {
         "distances": [30, 50],
         "logos": ["berlin_city.svg", "bvg.svg"],
         "gtfs": "berlin",
+        "color_scheme": "cool",
         "text": """Based on GTFS feed by BVG\nBerlin public transport routes"""
     },
     "hamburg": {
@@ -135,4 +139,5 @@ if __name__ == "__main__":
                        input_dir=out_dir, city=name,
                        logos=place_config["logos"],
                        text="")
-            p.generate_single(add_water=True, color_scheme=inferno_scheme)
+            color_scheme = color_schemes[place_config.get("color_scheme", "default")]
+            p.generate_single(add_water=True, color_scheme=color_scheme)
