@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import Iterable, Tuple
 
 import csv
-from smart_open import open
 
 from citylines.gtfs.domain import Point, SegmentsDataset, BoundingBox, RenderArea
 from citylines.gtfs.geo_utils import is_allowed_point, MaxDistance
