@@ -59,3 +59,11 @@ cool_scheme = ColorScheme(
     subway="#4DFFB3",
     tram="#6761A8"
 )
+
+color_schemes = {
+    'default': default_scheme,
+    'pastel': pastel_scheme,
+    'inferno': inferno_scheme,
+    'earthy': earthy_scheme,
+    'cool': cool_scheme
+}
