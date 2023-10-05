@@ -136,4 +136,3 @@ if __name__ == "__main__":
                        logos=place_config["logos"],
                        text="")
             p.generate_single(add_water=True, color_scheme=inferno_scheme)
-            # p.apply_fade_effect()
