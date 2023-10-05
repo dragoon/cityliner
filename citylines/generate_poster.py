@@ -67,9 +67,9 @@ class Poster:
             c.drawString(total_w + 250, start + i * 140, line.strip())
 
         # Adding additional text on the poster
-        c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")
-        c.drawRightString(self.render_area.width_px - 200, 120,
-                          "License for personal use only. Redistribution or commercial use is prohibited.")
+        # c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")
+        # c.drawRightString(self.render_area.width_px - 200, 120,
+        #                   "License for personal use only. Redistribution or commercial use is prohibited.")
 
         # Add city name on top
         c.setFont("Lato", 600)
