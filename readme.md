@@ -63,13 +63,13 @@ See configs from other cities in https://github.com/dragoon/cityliner/blob/maste
 ## Gallery
 
 <p align="middle">
-<img width="40%" src="gallery/zurich_30_inferno.png" alt="Zürich 30km Inferno Scheme Poster"/>
-<img width="40%" src="gallery/helsinki_30_default.png" alt="Helsinki 30km Default Scheme Poster"/>
+<img width="44%" src="gallery/zurich_30_inferno.png" alt="Zürich 30km Inferno Scheme Poster"/>
+<img width="44%" src="gallery/helsinki_30_default.png" alt="Helsinki 30km Default Scheme Poster"/>
 </p>
 
 <p align="middle">
-<img width="40%" src="gallery/tallinn_30_pastel.png" alt="Tallinn 30km Pastel Scheme Poster"/>
-<img width="40%" src="gallery/berlin_50_cool.png" alt="Berlin 50km Cool Scheme Poster"/>
+<img width="44%" src="gallery/tallinn_30_pastel.png" alt="Tallinn 30km Pastel Scheme Poster"/>
+<img width="44%" src="gallery/berlin_50_cool.png" alt="Berlin 50km Cool Scheme Poster"/>
 </p>
 
 
