@@ -58,4 +58,5 @@ def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_di
     with open(out_dir / "water_bodies_osm.json", 'w') as f:
         json.dump(water_bodies, f)
     create_file(out_dir, segments)
+    logging.debug(f"Route frequency files written to {out_dir}")
 

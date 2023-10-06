@@ -42,8 +42,11 @@ if __name__ == "__main__":
 
     process_gtfs_trips(center_point=Point(center_lat, center_lon), out_dir=out_dir, gtfs_dir=args.gtfs,
                        max_dist_y=dist, render_area=render_area)
+    logging.info("Generating pdf image...")
 
-    p = Poster(render_area, out_path=Path(f"./posters/{args.place_name}-{dist.km()}"),
+    image_filepath = Path(f"./posters/{args.place_name}-{dist.km()}.pdf")
+    p = Poster(render_area, out_path=image_filepath,
                input_dir=out_dir, city=args.place_name,
                logos=[logo for logo in args.logos], text="")
     p.generate_single(add_water=args.water, color_scheme=color_schemes[args.color_scheme])
+    logging.info(f"PDF generated at {image_filepath}")
