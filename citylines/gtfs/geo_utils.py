@@ -12,11 +12,11 @@ class Distance:
     def from_km(dist_km: float) -> 'Distance':
         return Distance(dist_km * 1000)
 
-    def m(self) -> float:
-        return self.dist_meters
+    def m(self) -> int:
+        return int(self.dist_meters)
 
-    def km(self) -> float:
-        return self.dist_meters / 1000
+    def km(self) -> int:
+        return int(self.dist_meters / 1000)
 
 
 @dataclass(frozen=True)

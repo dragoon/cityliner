@@ -9,12 +9,13 @@ from citylines.trip_extractor import process_gtfs_trips
 from citylines.util.colors import color_schemes
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
     parser.add_argument('--gtfs', required=True, help='Path to the input gtfs directory')
     parser.add_argument('--processed-dir', default="processed",
                         help="Base path to the processed gtfs directory (will be created if doesn't exist)")
-    parser.add_argument('--max-dist', type=float, default=20.0,
+    parser.add_argument('--max-dist', type=int, default=20,
                         help='Maximum distance from the center on y axis (in km)')
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -24,16 +25,10 @@ if __name__ == "__main__":
     parser.add_argument('--water', action='store_true', help='Add water bodies to the poster')
     parser.add_argument('--center', required=True, help='Coordinates of the center')
     parser.add_argument('--place_name', required=True, help='Name for the place')
-    parser.add_argument('--logos', nargs='*',
+    parser.add_argument('--logos', nargs='*', default=[],
                         help='List of logos for the poster (inside ./assets/logos/{place_name}/)')
     parser.add_argument('--color-scheme', choices=color_schemes.keys(), default='default',
                         help='Choose a color scheme for the poster. Allowed values are: %(choices)s')
-
-    logger = logging.getLogger(__name__)
-    handler = logging.StreamHandler()
-
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
 
     args = parser.parse_args()
     center_lat, center_lon = map(float, args.center.split(","))
