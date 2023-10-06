@@ -1,3 +1,7 @@
+<p align="middle">
+<img width="55%" src="gallery/zurich-30.png" alt="Zürich 30km"/>
+</p>
+
 # Cityliner
 
 This project aims to create colorful visualizations from GTFS (General Transit Feed Specification) public transport datasets.
