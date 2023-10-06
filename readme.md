@@ -1,5 +1,8 @@
 <p align="left">
-<img width="35%" src="gallery/zurich-30.png" alt="Zürich 30km"/>
+<img width="24%" src="gallery/zurich-30-default.png" alt="Zürich 30km"/>
+<img width="24%" src="gallery/zurich-30-pastel.png" alt="Zürich 30km"/>
+<img width="24%" src="gallery/zurich-30-earhy.png" alt="Zürich 30km"/>
+<img width="24%" src="gallery/zurich-30-inferno.png" alt="Zürich 30km"/>
 </p>
 
 # Cityliner
