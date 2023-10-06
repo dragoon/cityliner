@@ -43,6 +43,7 @@ class Poster:
 
     def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
+        pdfmetrics.registerFont(TTFont('Garamond', 'assets/fonts/EBGaramond-VariableFont_wght.ttf'))
 
         self.out_path.parent.mkdir(parents=True, exist_ok=True)
         c = canvas.Canvas(str(self.out_path), pagesize=(A0[0], A0[1]))
@@ -72,7 +73,7 @@ class Poster:
         #                   "License for personal use only. Redistribution or commercial use is prohibited.")
 
         # Add city name on top
-        c.setFont("Lato", 600)
+        c.setFont("Garamond", 600)
         c.drawString(250, self.render_area.height_px - 650, self.city.title())
 
         c.showPage()
