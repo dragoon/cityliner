@@ -13,7 +13,7 @@ Each primary mode of transportation, as defined in GTFS terms, is represented by
 4. [Gallery](#gallery)
 5. [Contribution](#contribution)
 6. [License](#license)
-7. [History](#history)
+7. [Acknowledgements](#acknowledgements)
 
 ## Features
 
@@ -91,7 +91,7 @@ This source code is licensed under GNU GPLv3. See the `LICENSE` file for more de
     Copyright (c) 2023
 	Roman Prokofyev <https://prokofyev.ch/>
 
-## History
+## Acknowledgements
 This project is inspired by Michael Mueller's [gtfs-visualizations](https://github.com/cmichi/gtfs-visualizations) repository (implemented with Node.js and Processing),
 and my fork: https://github.com/dragoon/gtfs-visualizations,
 which allowed to process large GTFS files, added actual poster-generation code,
