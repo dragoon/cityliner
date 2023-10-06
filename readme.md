@@ -63,7 +63,7 @@ python main.py --gtfs gtfs/[place_name] --center [center_coordinates] --poster [
 
 Example Helsinki:
 ```shell
-python main.py --gtfs ./gtfs/helsinki --center 60.1706017,24.9414482 --poster --color-scheme pastel --water
+python main.py --gtfs=./gtfs/helsinki --place_name=helsinki --center=60.1706017,24.9414482 --poster --color-scheme=pastel --water
 ```
 See configs from other cities in https://github.com/dragoon/cityliner/blob/master/citylines/process_configs.py
 

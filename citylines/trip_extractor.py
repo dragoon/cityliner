@@ -5,8 +5,8 @@ from pathlib import Path
 from citylines.gtfs.domain import RenderArea
 from citylines.water.oceans import get_ocean_water_bodies
 from citylines.water.osm import get_osm_water_bodies
-from gtfs.geo_utils import MaxDistance, Distance
-from gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px, Point
+from citylines.gtfs.geo_utils import MaxDistance, Distance
+from citylines.gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px, Point
 
 
 def create_file(out_dir: Path, seg: SegmentsDataset):

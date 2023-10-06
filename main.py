@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
     parser.add_argument('--gtfs', required=True, help='Path to the input gtfs directory')
-    parser.add_argument('--processed-dir', required=True, default="processed",
+    parser.add_argument('--processed-dir', default="processed",
                         help="Base path to the processed gtfs directory (will be created if doesn't exist)")
     parser.add_argument('--max-dist', type=float, default=20.0,
                         help='Maximum distance from the center on y axis (in km)')
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     parser.add_argument('--water', action='store_true', help='Add water bodies to the poster')
     parser.add_argument('--center', required=True, help='Coordinates of the center')
     parser.add_argument('--place_name', required=True, help='Name for the place')
-    parser.add_argument('--logos', required=True, nargs='+',
+    parser.add_argument('--logos', nargs='*',
                         help='List of logos for the poster (inside ./assets/logos/{place_name}/)')
     parser.add_argument('--color-scheme', choices=color_schemes.keys(), default='default',
                         help='Choose a color scheme for the poster. Allowed values are: %(choices)s')
