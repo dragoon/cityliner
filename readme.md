@@ -86,7 +86,7 @@ Feel free to fork this repository, open issues, or submit pull requests. Any con
 
 ### Code
 
-	This source code is licensed under GNU GPLv3. See the `LICENSE` file for more details.
+This source code is licensed under GNU GPLv3. See the `LICENSE` file for more details.
 
     Copyright (c) 2023
 	Roman Prokofyev <https://prokofyev.ch/>
