@@ -7,9 +7,9 @@
 
 # Cityliner
 
-This project aims to create colorful visualizations from GTFS (General Transit Feed Specification) public transport datasets.
-It illustrates public transport routes on a map, where the thickness and opacity of the lines
-are determined by the frequency of the schedules along that route segment.
+Create colorful visualizations of public transport from GTFS (General Transit Feed Specification) public transport datasets.
+Public transport routes drawn on a map, where the thickness and opacity of the lines
+is determined by the frequency of the schedules along that route segment.
 Each primary mode of transportation, as defined in GTFS terms, is represented by a unique color.
 
 ## Table of Contents
