@@ -47,7 +47,7 @@ class Poster:
 
         self.out_path.parent.mkdir(parents=True, exist_ok=True)
         c = canvas.Canvas(str(self.out_path), pagesize=(A0[0], A0[1]))
-        # reportlab measures in points, and not pixels
+        # reportlab measures in physical mm, not px
         c.scale(A0[0] / self.render_area.width_px, A0[1] / self.render_area.height_px)
         c.setLineWidth(1)
         c.setFillColorRGB(0, 0, 0)
@@ -123,7 +123,7 @@ class Poster:
             return max_val
 
     def _draw_routes(self, c: Canvas, color_scheme: ColorScheme):
-        max_lines = self.get_max_lines()
+        max_trips = self.get_max_lines()
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
         c.scale(1, -1)
@@ -145,7 +145,7 @@ class Poster:
                         stroke_weight = 1.0 * factor
 
                     c.setLineWidth(stroke_weight)
-                    alph = 100 * (float(trips) / max_lines)
+                    alph = 100 * (float(trips) / max_trips)
                     if alph < 20.0:
                         alph = 20.0
 

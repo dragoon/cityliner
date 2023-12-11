@@ -138,8 +138,8 @@ class GTFSDataset:
                                            bottom=min_bottom,
                                            render_area=render_area,
                                            center=center
-                                           ), max_trips,
-                               min_trips)
+                                           ),
+                               max_trips, min_trips)
 
     @staticmethod
     def from_path(gtfs_folder: str) -> 'GTFSDataset':

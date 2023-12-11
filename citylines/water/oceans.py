@@ -13,10 +13,7 @@ def process_polygon(polygon, bbox_orig: BoundingBox):
 def get_ocean_water_bodies(bbox_orig: BoundingBox):
     # Load the Natural Earth Data
     water_gdf = gpd.read_file('oceans/water_polygons.shp')
-
-    # Define your bounding box
     bbox = box(bbox_orig.left, bbox_orig.bottom, bbox_orig.right, bbox_orig.top)
-
     # Filter the data
     filtered_water_gdf = water_gdf[water_gdf.geometry.intersects(bbox)]
 
