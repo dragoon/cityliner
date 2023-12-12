@@ -96,14 +96,14 @@ class Poster:
     def apply_fade_effect(self):
         out_path = self._convert_pdf_to_png()
         image = Image.open(out_path)
-        fade_distance = int(min(self.render_area.width_px, self.render_area.height_px) / 10)
-        mask = Image.new('L', (self.render_area.width_px, self.render_area.height_px), 255)
+        fade_distance = int(min(*image.size) / 10)
+        mask = Image.new('L', image.size, 255)
 
         draw = ImageDraw.Draw(mask)
 
         for i in range(fade_distance):
             alpha = int(255 * (i / fade_distance))
-            draw.rectangle((i, i, self.render_area.width_px - i, self.render_area.height_px - i), outline=alpha)
+            draw.rectangle((i, i, image.size[0] - i, image.size[1] - i), outline=alpha)
 
         # Ensure that image and backdrop image are in the same mode (either RGB or RGBA)
         backdrop_image = Image.new(image.mode, image.size, (0, 0, 0, 255))
@@ -111,7 +111,7 @@ class Poster:
         faded_image.save(out_path)
 
     def _convert_pdf_to_png(self):
-        images = convert_from_path(self.out_path)
+        images = convert_from_path(self.out_path, dpi=50)
         # Assuming the PDF has one page
         out_path = self.out_path.with_suffix(".png")
         images[0].save(out_path, 'PNG')
