@@ -41,7 +41,7 @@ if __name__ == "__main__":
     out_dir = Path(f"{args.processed_dir}/{args.place_name}/{dist.km()}")
 
     process_gtfs_trips(center_point=Point(center_lat, center_lon), out_dir=out_dir, gtfs_dir=args.gtfs,
-                       max_dist_y=dist, render_area=render_area)
+                       max_dist_y=dist, render_area=render_area, add_water=args.water)
     logging.info("Generating pdf image...")
 
     image_filepath = Path(f"./posters/{args.place_name}-{dist.km()}.pdf")

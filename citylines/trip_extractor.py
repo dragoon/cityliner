@@ -36,7 +36,8 @@ def create_file(out_dir: Path, seg: SegmentsDataset):
     logging.info("Write complete")
 
 
-def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_dist_y: Distance, render_area: RenderArea):
+def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_dist_y: Distance,
+                       render_area: RenderArea, add_water: bool):
     if out_dir.exists():
         logging.debug(f"Path {out_dir} already exists, skipping re-generation")
         return
@@ -52,11 +53,12 @@ def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_di
     logging.debug("Computing GTFS segments data...")
     dataset = GTFSDataset.from_path(gtfs_dir)
     segments = dataset.compute_segments(center_point, render_area, max_dist)
-    logging.debug("Extracting water bodies ...")
-    water_bodies = get_osm_water_bodies(bbox=segments.bbox)
-    water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
-    with open(out_dir / "water_bodies_osm.json", 'w') as f:
-        json.dump(water_bodies, f)
+    if add_water:
+        logging.debug("Extracting water bodies ...")
+        water_bodies = get_osm_water_bodies(bbox=segments.bbox)
+        water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
+        with open(out_dir / "water_bodies_osm.json", 'w') as f:
+            json.dump(water_bodies, f)
     create_file(out_dir, segments)
     logging.debug(f"Route frequency files written to {out_dir}")
 
