@@ -18,9 +18,9 @@ if __name__ == "__main__":
     parser.add_argument('--max-dist', type=int, default=20,
                         help='Maximum distance from the center on y axis (in km)')
 
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--poster', action='store_true', help='Make A0 poster (9933x14043 px)')
-    group.add_argument('--size', type=int, help='Size of the output drawing (in px)')
+    parser.add_argument('--poster', action='store_true', help='Make A0 poster (9933x14043 px)')
+    parser.add_argument('--width', type=int, help='Width of the output drawing (in px)')
+    parser.add_argument('--height', type=int, help='Height of the output drawing (in px)')
 
     parser.add_argument('--water', action='store_true', help='Add water bodies to the poster')
     parser.add_argument('--center', required=True, help='Coordinates of the center')
@@ -31,11 +31,14 @@ if __name__ == "__main__":
                         help='Choose a color scheme for the poster. Allowed values are: %(choices)s')
 
     args = parser.parse_args()
+
     center_lat, center_lon = map(float, args.center.split(","))
     if args.poster:
         render_area = RenderArea.poster()
+    elif args.width and args.height:
+        render_area = RenderArea(args.width, args.height)
     else:
-        render_area = RenderArea(args.size, args.size)
+        parser.error("Either both width and height must be provided, or --poster must be set.")
 
     dist = Distance.from_km(args.max_dist)
     out_dir = Path(f"{args.processed_dir}/{args.place_name}/{dist.km()}")
