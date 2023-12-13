@@ -133,7 +133,8 @@ if __name__ == "__main__":
                                out_dir=out_dir,
                                gtfs_dir=f"./gtfs/{place_config['gtfs']}",
                                max_dist_y=Distance.from_km(max_dist),
-                               render_area=render_area)
+                               render_area=render_area,
+                               add_water=True)
 
             p = Poster(render_area, out_path=Path(f"./posters/{name}-{max_dist}.pdf"),
                        input_dir=out_dir, city=name,
