@@ -30,6 +30,20 @@ class Poster:
     text: str
     logos: list[str]
 
+    def __post_init__(self):
+        self.logo_gap = 70*self.scaling_w
+        self.target_logo_h = 564*self.scaling_h
+        self.logo_start_x = 200*self.scaling_w
+        self.logo_start_y = 100*self.scaling_h
+        self.font_size = 88*self.scaling_h
+        self.heading_font_size = 600*self.scaling_h
+        self.heading_start_x = 250*self.scaling_w
+        self.heading_start_y = self.render_area.height_px - 650*self.scaling_h
+
+        self.extra_text_start_x = 250*self.scaling_w
+        self.extra_text_start_y = 120*self.scaling_h
+        self.extra_text_gap_y = 140 * self.scaling_h
+
     @property
     def scaling_w(self) -> float:
         return self.render_area.width_px / 9933
@@ -39,14 +53,12 @@ class Poster:
         return self.render_area.height_px / 14043
 
     def _draw_logos(self, c: Canvas):
-        gap_pt = 70*self.scaling_w
-        target_logo_h = 564*self.scaling_h
         total_w = 0
         for logo in self.logos:
             provider_w, _ = self._draw_svg_on_pdf(c, f"assets/logos/{self.city}/{logo}",
-                                                  200*self.scaling_w + total_w,
-                                                  100*self.scaling_h, height=target_logo_h)
-            total_w += provider_w + gap_pt
+                                                  self.logo_start_x + total_w,
+                                                  self.logo_start_y, height=self.target_logo_h)
+            total_w += provider_w + self.logo_gap
         return total_w
 
     def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False):
@@ -67,15 +79,14 @@ class Poster:
             self._draw_water_bodies(c)
         self._draw_routes(c, color_scheme)
 
-        c.setFont("Lato", 88*self.scaling_h)
+        c.setFont("Lato", self.font_size)
         total_w = self._draw_logos(c)
 
         gray_value = 200 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
         # WRITE EXTRA TEXT
-        start = 120*self.scaling_h
         for i, line in enumerate(self.text.split('\n')):
-            c.drawString(total_w + 250*self.scaling_w, start + i * 140 * self.scaling_h, line.strip())
+            c.drawString(total_w + self.extra_text_start_x, self.extra_text_start_y + i * self.extra_text_gap_y, line.strip())
 
         # Adding additional text on the poster
         # c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")
@@ -83,8 +94,8 @@ class Poster:
         #                   "License for personal use only. Redistribution or commercial use is prohibited.")
 
         # Add city name on top
-        c.setFont("Garamond", 600*self.scaling_h)
-        c.drawString(250*self.scaling_w, self.render_area.height_px - 650*self.scaling_h, self.city.title())
+        c.setFont("Garamond", self.heading_font_size)
+        c.drawString(self.heading_start_x, self.heading_start_y, self.city.title())
 
         c.showPage()
         c.save()
