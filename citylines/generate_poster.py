@@ -6,7 +6,6 @@ from PIL import Image, ImageDraw
 
 from pdf2image import convert_from_path
 
-from reportlab.lib.pagesizes import A0
 from reportlab.pdfbase import pdfmetrics
 from reportlab.graphics.shapes import Polygon, Drawing
 from reportlab.pdfbase.ttfonts import TTFont
@@ -31,13 +30,22 @@ class Poster:
     text: str
     logos: list[str]
 
+    @property
+    def scaling_w(self) -> float:
+        return self.render_area.width_px / 9933
+
+    @property
+    def scaling_h(self) -> float:
+        return self.render_area.height_px / 14043
+
     def _draw_logos(self, c: Canvas):
-        gap_pt = 70
-        target_logo_h = 564
+        gap_pt = 70*self.scaling_w
+        target_logo_h = 564*self.scaling_h
         total_w = 0
         for logo in self.logos:
-            provider_w, _ = self._draw_svg_on_pdf(c, f"assets/logos/{self.city}/{logo}", 200 + total_w,
-                                                  100, height=target_logo_h)
+            provider_w, _ = self._draw_svg_on_pdf(c, f"assets/logos/{self.city}/{logo}",
+                                                  200*self.scaling_w + total_w,
+                                                  100*self.scaling_h, height=target_logo_h)
             total_w += provider_w + gap_pt
         return total_w
 
@@ -46,9 +54,11 @@ class Poster:
         pdfmetrics.registerFont(TTFont('Garamond', 'assets/fonts/EBGaramond-VariableFont_wght.ttf'))
 
         self.out_path.parent.mkdir(parents=True, exist_ok=True)
-        c = canvas.Canvas(str(self.out_path), pagesize=(A0[0], A0[1]))
-        # reportlab measures in physical mm, not px
-        c.scale(A0[0] / self.render_area.width_px, A0[1] / self.render_area.height_px)
+
+        # reportlab measures in physical mm, not px, 0.24 is a scale factor
+        c = canvas.Canvas(str(self.out_path),
+                          pagesize=(self.render_area.width_px*0.24, self.render_area.height_px*0.24))
+        c.scale(0.24, 0.24)
         c.setLineWidth(1)
         c.setFillColorRGB(0, 0, 0)
         c.rect(0, 0, self.render_area.width_px, self.render_area.height_px, fill=1)
@@ -57,15 +67,15 @@ class Poster:
             self._draw_water_bodies(c)
         self._draw_routes(c, color_scheme)
 
-        c.setFont("Lato", 88)
+        c.setFont("Lato", 88*self.scaling_h)
         total_w = self._draw_logos(c)
 
         gray_value = 200 / 255
         c.setFillColorRGB(gray_value, gray_value, gray_value)
         # WRITE EXTRA TEXT
-        start = 120
+        start = 120*self.scaling_h
         for i, line in enumerate(self.text.split('\n')):
-            c.drawString(total_w + 250, start + i * 140, line.strip())
+            c.drawString(total_w + 250*self.scaling_w, start + i * 140 * self.scaling_h, line.strip())
 
         # Adding additional text on the poster
         # c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")
@@ -73,8 +83,8 @@ class Poster:
         #                   "License for personal use only. Redistribution or commercial use is prohibited.")
 
         # Add city name on top
-        c.setFont("Garamond", 600)
-        c.drawString(250, self.render_area.height_px - 650, self.city.title())
+        c.setFont("Garamond", 600*self.scaling_h)
+        c.drawString(250*self.scaling_w, self.render_area.height_px - 650*self.scaling_h, self.city.title())
 
         c.showPage()
         c.save()
@@ -111,7 +121,7 @@ class Poster:
         faded_image.save(out_path)
 
     def _convert_pdf_to_png(self):
-        images = convert_from_path(self.out_path, dpi=50)
+        images = convert_from_path(self.out_path, dpi=200)
         # Assuming the PDF has one page
         out_path = self.out_path.with_suffix(".png")
         images[0].save(out_path, 'PNG')
@@ -144,7 +154,7 @@ class Poster:
                     if stroke_weight < 0:
                         stroke_weight = 1.0 * factor
 
-                    c.setLineWidth(stroke_weight)
+                    c.setLineWidth(stroke_weight*self.scaling_w)
                     alph = 100 * (float(trips) / max_trips)
                     if alph < 20.0:
                         alph = 20.0
