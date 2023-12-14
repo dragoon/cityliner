@@ -56,7 +56,7 @@ python main.py --gtfs gtfs/[place_name] --center [center_coordinates] --poster [
 - `--processed-dir`: Path to the directory with intermediate files (defaults to ``./processed``).
 - `--center`: Coordinates of the center in the format `latitude,longitude`. **(Required)**
 - `--max-dist`: Maximum distance from the center on y-axis (in km). Default is 20 km.
-- `--witdh`: Width of the output drawing (in px).
+- `--width`: Width of the output drawing (in px).
 - `--height`: Height of the output drawing (in px)
 - `--poster`: Create a drawing for A0 poster size.
 - `--water`: Add water bodies to the poster (beta).
