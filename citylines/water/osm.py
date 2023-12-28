@@ -47,6 +47,8 @@ def get_osm_water_bodies(bbox: BoundingBox) -> list[dict]:
     out tags skel qt;
     """
     response = requests.get(overpass_url, params={'data': query})
+    if response.status_code != 200:
+        raise Exception(f"Overpass response error {response.status_code}: {response.text}")
     data = response.json()
     relations = []
     way_dict = {}
