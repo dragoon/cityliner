@@ -9,6 +9,22 @@ from citylines.trip_extractor import process_gtfs_trips
 from citylines.util.colors import color_schemes
 
 PLACE_CONFIGS = {
+    "warsaw": {
+        "center": Point(52.228865, 21.0006369),
+        "distances": [30, 50],
+        "logos": [],
+        "gtfs": "warsaw",
+        "color_scheme": "pastel",
+        "text": """Warsaw public transport routes"""
+    },
+    "wroclaw": {
+        "center": Point(51.1094782, 17.0108073),
+        "distances": [30, 50],
+        "logos": [],
+        "gtfs": "wroclaw",
+        "color_scheme": "pastel",
+        "text": """Wrocław public transport routes"""
+    },
     "zurich": {
         "center": Point(47.3773887, 8.5386569),
         "distances": [20, 30, 50],
