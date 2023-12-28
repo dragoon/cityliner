@@ -113,7 +113,8 @@ class GTFSDataset:
                 min_trips = trips_n
 
             pts = []
-            for seq, shape in shape_sequences.items():
+            # sort sequences as some GTFS datasets have them unsorted (e.g., Wroclaw)
+            for shape in sorted(shape_sequences.values(), key=lambda s: int(s['shape_pt_sequence'])):
                 y = float(shape['shape_pt_lat'])
                 x = float(shape['shape_pt_lon'])
                 min_left = min(x, min_left)
