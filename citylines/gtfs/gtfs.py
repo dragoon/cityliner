@@ -27,39 +27,29 @@ class GTFSDataset:
         with open(routes_path, 'r', newline='', encoding=self._get_file_encoding(routes_path)) as file:
             reader = csv.DictReader(file)
             for row in reader:
-                try:
-                    route_id = row["route_id"]
-                    route_type = row["route_type"]
-                    yield route_id, route_type
-                except KeyError:
-                    continue
+                route_id = row["route_id"]
+                route_type = row["route_type"]
+                yield route_id, route_type
 
     def _parse_trips(self) -> Iterable:
         trips_path = f"{self.gtfs_folder_path}/trips.txt"
         with open(trips_path, 'r', newline='', encoding=self._get_file_encoding(trips_path)) as file:
             reader = csv.DictReader(file)
             for row in reader:
-                try:
-                    shape_id = row["shape_id"]
-                    route_id = row["route_id"]
-                    yield shape_id, route_id
-                except KeyError:
-                    # in case on empty lines
-                    continue
+                shape_id = row["shape_id"]
+                route_id = row["route_id"]
+                yield shape_id, route_id
 
     def _parse_shapes(self) -> Iterable:
         shapes_path = f"{self.gtfs_folder_path}/shapes.txt"
         with open(shapes_path, 'r', newline='', encoding=self._get_file_encoding(shapes_path)) as file:
             reader = csv.DictReader(file)
             for row in reader:
-                try:
-                    shape_id = row["shape_id"]
-                    shape_pt_lat = row["shape_pt_lat"]
-                    shape_pt_lon = row["shape_pt_lon"]
-                    shape_pt_sequence = row["shape_pt_sequence"]
-                    yield shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, row
-                except KeyError:
-                    continue
+                shape_id = row["shape_id"]
+                shape_pt_lat = row["shape_pt_lat"]
+                shape_pt_lon = row["shape_pt_lon"]
+                shape_pt_sequence = row["shape_pt_sequence"]
+                yield shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence, row
 
     def _get_route_id_types(self) -> dict:
         logging.debug("Starting route types iteration...")
