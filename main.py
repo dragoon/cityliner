@@ -23,8 +23,9 @@ if __name__ == "__main__":
     parser.add_argument('--height', type=int, help='Height of the output drawing (in px)')
 
     parser.add_argument('--water', action='store_true', help='Add water bodies to the poster')
+    parser.add_argument('--admin-borders', action='store_true', help='Add water bodies to the poster')
     parser.add_argument('--center', required=True, help='Coordinates of the center')
-    parser.add_argument('--place_name', required=True, help='Name for the place')
+    parser.add_argument('--place-name', required=True, help='Name for the place')
     parser.add_argument('--logos', nargs='*', default=[],
                         help='List of logos for the poster (inside ./assets/logos/{place_name}/)')
     parser.add_argument('--color-scheme', choices=color_schemes.keys(), default='default',
@@ -44,12 +45,13 @@ if __name__ == "__main__":
     out_dir = Path(f"{args.processed_dir}/{args.place_name}/{dist.km()}")
 
     process_gtfs_trips(center_point=Point(center_lat, center_lon), out_dir=out_dir, gtfs_dir=args.gtfs,
-                       max_dist_y=dist, render_area=render_area, add_water=args.water)
+                       max_dist_y=dist, render_area=render_area, add_water=args.water, add_borders=args.admin_borders)
     logging.info("Generating pdf image...")
 
     image_filepath = Path(f"./posters/{args.place_name}-{dist.km()}.pdf")
     p = Poster(render_area, out_path=image_filepath,
                input_dir=out_dir, city=args.place_name,
                logos=[logo for logo in args.logos], text="")
-    p.generate_single(add_water=args.water, color_scheme=color_schemes[args.color_scheme])
+    p.generate_single(add_water=args.water, add_admin_borders=args.admin_borders,
+                      color_scheme=color_schemes[args.color_scheme])
     logging.info(f"PDF generated at {image_filepath}")

@@ -2,6 +2,8 @@ import json
 import logging
 from pathlib import Path
 
+from citylines.admin.borders import get_osm_admin_borders
+from citylines.admin.geocode import get_place_relation_id
 from citylines.gtfs.domain import RenderArea
 from citylines.water.oceans import get_ocean_water_bodies
 from citylines.water.osm import get_osm_water_bodies
@@ -37,7 +39,8 @@ def create_file(out_dir: Path, seg: SegmentsDataset):
 
 
 def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_dist_y: Distance,
-                       render_area: RenderArea, add_water: bool):
+                       render_area: RenderArea, add_water: bool, add_borders: bool):
+
     if (out_dir / "data.lines").exists():
         logging.debug(f"data.lines file in {out_dir} already exists, skipping re-generation")
         return
@@ -56,10 +59,16 @@ def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_di
     create_file(out_dir, segments)
     logging.debug(f"Route frequency files written to {out_dir}")
 
+    if add_borders and not (out_dir / "borders_osm.json").exists():
+        logging.debug("Extracting borders...")
+        place_id = get_place_relation_id(center_point.lat, center_point.lon)
+        borders = get_osm_admin_borders(place_id=place_id, bbox=segments.bbox)
+        with open(out_dir / "borders_osm.json", 'w') as f:
+            json.dump(borders, f)
+
     if add_water and not (out_dir / "water_bodies_osm.json").exists():
-        logging.debug("Extracting water bodies ...")
+        logging.debug("Extracting water bodies...")
         water_bodies = get_osm_water_bodies(bbox=segments.bbox)
         water_bodies.extend(get_ocean_water_bodies(bbox_orig=segments.bbox))
         with open(out_dir / "water_bodies_osm.json", 'w') as f:
             json.dump(water_bodies, f)
-

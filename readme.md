@@ -37,13 +37,13 @@ Each primary mode of transportation, as defined in GTFS terms, is represented by
    ```
 3. Download Ocean shape file from OpenStreetMap: https://osmdata.openstreetmap.de/data/water-polygons.html (WGS84 Projection) and unzip it into the `oceans` directory.
 4. Download GTFS data with ``shapes.txt`` file available, see catalog here: https://github.com/MobilityData/mobility-database-catalogs.
-   And place it under ``gtfs/[place_name]/**``
-5. Download some city/transport company logos if needed and place into ``assets/logos/[place_name]/**``.
+   And place it under ``gtfs/[place-name]/**``
+5. Download some city/transport company logos if needed and place into ``assets/logos/[place-name]/**``.
 
 ## Usage
 Run the script using the following command:
 ```shell
-python main.py --gtfs gtfs/[place_name] --center [center_coordinates] --poster [other_options]
+python main.py --gtfs gtfs/[place-name] --center [center_coordinates] --poster [other_options]
 ```
 
 ### Options:
@@ -56,13 +56,13 @@ python main.py --gtfs gtfs/[place_name] --center [center_coordinates] --poster [
 - `--poster`: Create a drawing for A0 poster size.
 - `--water`: Add water bodies to the poster (beta).
 - `--color-scheme`: Choose a color scheme for the poster. Allowed values are: `default`, `pastel`, `inferno`, `earthy`, `cool`. Default is `default`.
-- `--logos`: List of logos for the poster (inside `./assets/logos/{place_name}/`)
+- `--logos`: List of logos for the poster (inside `./assets/logos/{place-name}/`)
 
 **(Either `--width` and `--height` or `--poster` must be provided)**
 
 Example Helsinki:
 ```shell
-python main.py --gtfs=./gtfs/helsinki --place_name=helsinki --center=60.1706017,24.9414482 --poster --color-scheme=pastel --water --logos "helsinki.svg" "hsl.svg"
+python main.py --gtfs=./gtfs/helsinki --place-name=helsinki --center=60.1706017,24.9414482 --poster --color-scheme=pastel --water --logos "helsinki.svg" "hsl.svg"
 ```
 See configs for other cities in https://github.com/dragoon/cityliner/blob/master/citylines/process_configs.py
 
