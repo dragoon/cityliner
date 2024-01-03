@@ -236,9 +236,9 @@ class Poster:
             way_paths = json.load(f)
 
         # Create a Drawing with the same size as the Canvas
-        c.setDash(5, 10)
-        c.setStrokeColorRGB(255, 255, 255)
-        c.setLineWidth(1)
+        c.setDash(2, 10)
+        c.setStrokeColorRGB(150, 150, 150)
+        c.setLineWidth(2)
 
         for way_path in way_paths:
             if not way_path:
