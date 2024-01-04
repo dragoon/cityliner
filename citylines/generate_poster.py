@@ -232,10 +232,8 @@ class Poster:
         with open(self.input_dir / "borders_osm.json", 'r') as f:
             way_paths = json.load(f)
 
-        # Create a Drawing with the same size as the Canvas
-        c.setDash(2, 10)
         c.setStrokeColorRGB(150, 150, 150)
-        c.setLineWidth(2)
+        c.setLineWidth(20)
 
         for way_path in way_paths:
             if not way_path:

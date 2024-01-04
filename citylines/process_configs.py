@@ -9,7 +9,7 @@ from citylines.util.colors import color_schemes
 PLACE_CONFIGS = {
     "wroclaw": {
         "center": Point(51.1094782, 17.0108073),
-        "distances": [10, 20, 30],
+        "distances": [20, 30],
         "logos": [],
         "gtfs": "wroclaw",
         "color_scheme": "pastel",
@@ -18,7 +18,7 @@ PLACE_CONFIGS = {
     "warsaw": {
         "center": Point(52.228865, 21.0006369),
         "distances": [20, 30, 50],
-        "logos": [],
+        "logos": ["warsaw.svg", "wtp_logo.svg"],
         "gtfs": "warsaw",
         "color_scheme": "pastel",
         "text": """Warsaw public transport routes"""
@@ -156,4 +156,4 @@ if __name__ == "__main__":
                        logos=place_config["logos"],
                        text="")
             color_scheme = color_schemes[place_config.get("color_scheme", "default")]
-            p.generate_single(add_water=True, color_scheme=color_scheme)
+            p.generate_single(add_water=True, color_scheme=color_scheme, add_admin_borders=True)
