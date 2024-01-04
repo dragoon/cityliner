@@ -6,7 +6,7 @@ from citylines.admin.borders import get_osm_admin_borders
 from citylines.admin.geocode import get_place_relation_id
 from citylines.gtfs.domain import RenderArea
 from citylines.water.oceans import get_ocean_water_bodies
-from citylines.water.osm import get_osm_water_bodies
+from citylines.water.other_water import get_osm_water_bodies
 from citylines.gtfs.geo_utils import MaxDistance, Distance
 from citylines.gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px, Point
 

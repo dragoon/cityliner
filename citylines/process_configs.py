@@ -19,7 +19,7 @@ PLACE_CONFIGS = {
     },
     "warsaw": {
         "center": Point(52.228865, 21.0006369),
-        "distances": [20, 30],
+        "distances": [20, 30, 50],
         "logos": [],
         "gtfs": "warsaw",
         "color_scheme": "pastel",

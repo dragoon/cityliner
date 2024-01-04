@@ -10,6 +10,7 @@ from citylines.util.colors import color_schemes
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    logging.getLogger('fiona.ogrext').setLevel(logging.WARNING)
 
     parser = argparse.ArgumentParser(description='Process GTFS data to output lines.')
     parser.add_argument('--gtfs', required=True, help='Path to the input gtfs directory')
