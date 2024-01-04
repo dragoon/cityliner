@@ -91,6 +91,5 @@ class BoundingBox:
 @dataclass(frozen=True)
 class SegmentsDataset:
     segments: list[dict]
-    bbox: BoundingBox
     max_trips_per_seg: int
     min_trips_per_seg: int
