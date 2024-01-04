@@ -6,8 +6,8 @@ from typing import Iterable, Tuple
 
 import csv
 
-from citylines.gtfs.domain import Point, SegmentsDataset, BoundingBox, RenderArea
-from citylines.gtfs.geo_utils import is_allowed_point, MaxDistance
+from citylines.gtfs.domain import Point, SegmentsDataset, BoundingBox, MaxDistance
+from citylines.gtfs.geo_utils import is_allowed_point
 
 
 @dataclass(frozen=True)
@@ -88,7 +88,7 @@ class GTFSDataset:
         logging.debug("Finished shape iteration")
         return sequences
 
-    def compute_segments(self, center: Point, render_area: RenderArea,
+    def compute_segments(self, center: Point, bbox: BoundingBox,
                          max_dist: MaxDistance) -> SegmentsDataset:
         route_types, trips_on_a_shape = self._get_trips_and_routes()
         sequences = self._get_sequences(center, max_dist)
@@ -143,14 +143,7 @@ class GTFSDataset:
         logging.debug(f"max trips per segment: {max_trips}")
         logging.debug(f"min trips per segment: {min_trips}")
 
-        return SegmentsDataset(segments,
-                               BoundingBox(left=min_left,
-                                           right=max_right,
-                                           top=max_top,
-                                           bottom=min_bottom,
-                                           render_area=render_area,
-                                           center=center
-                                           ),
+        return SegmentsDataset(segments, bbox,
                                max_trips, min_trips)
 
     @staticmethod

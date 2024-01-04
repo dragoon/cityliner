@@ -3,8 +3,7 @@ import logging
 from pathlib import Path
 
 from citylines.generate_poster import Poster
-from citylines.gtfs.domain import RenderArea, Point
-from citylines.gtfs.geo_utils import Distance
+from citylines.gtfs.domain import RenderArea, Point, Distance
 from citylines.trip_extractor import process_gtfs_trips
 from citylines.util.colors import color_schemes
 
