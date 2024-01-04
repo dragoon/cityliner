@@ -10,7 +10,7 @@ PLACE_CONFIGS = {
     "wroclaw": {
         "center": Point(51.1094782, 17.0108073),
         "distances": [20, 30],
-        "logos": [],
+        "logos": ["wroclaw.svg"],
         "gtfs": "wroclaw",
         "color_scheme": "pastel",
         "text": """Wrocław public transport routes"""
@@ -40,7 +40,7 @@ PLACE_CONFIGS = {
     },
     "fribourg": {
         "center": Point(46.806477, 7.161972),
-        "distances": [10, 20, 30],
+        "distances": [10, 20],
         "logos": ["kanton_fribourg.svg", "logo-fribourg-en.svg"],
         "gtfs": "switzerland",
         "text": """Based on GTFS feed by Swiss Federal Railways\nFribourg public transport routes"""
@@ -61,7 +61,7 @@ PLACE_CONFIGS = {
     },
     "geneva": {
         "center": Point(46.204391, 6.143158),
-        "distances": [20, 30, 50],
+        "distances": [10, 20],
         "logos": ["kanton_geneva.svg"],
         "gtfs": "switzerland",
         "text": """Based on GTFS feed by Swiss Federal Railways\nGeneva public transport routes"""
