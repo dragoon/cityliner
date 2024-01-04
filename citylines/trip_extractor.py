@@ -2,10 +2,9 @@ import json
 import logging
 from pathlib import Path
 
-from citylines.gtfs.domain import RenderArea
+from citylines.gtfs.domain import RenderArea, MaxDistance, Distance, BoundingBox
 from citylines.water.oceans import get_ocean_water_bodies
 from citylines.water.osm import get_osm_water_bodies
-from citylines.gtfs.geo_utils import MaxDistance, Distance
 from citylines.gtfs.gtfs import GTFSDataset, SegmentsDataset, coord2px, Point
 
 
@@ -52,7 +51,8 @@ def process_gtfs_trips(center_point: Point, out_dir: Path, gtfs_dir: str, max_di
 
     logging.debug("Computing GTFS segments data...")
     dataset = GTFSDataset.from_path(gtfs_dir)
-    segments = dataset.compute_segments(center_point, render_area, max_dist)
+    bbox = BoundingBox.from_center(center_point, max_dist, render_area=render_area)
+    segments = dataset.compute_segments(center_point, bbox, max_dist)
     create_file(out_dir, segments)
     logging.debug(f"Route frequency files written to {out_dir}")
 

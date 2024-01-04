@@ -1,36 +1,6 @@
 import math
-from dataclasses import dataclass
 
-from citylines.gtfs.domain import Point, RenderArea
-
-
-@dataclass(frozen=True)
-class Distance:
-    dist_meters: float
-
-    @staticmethod
-    def from_km(dist_km: float) -> 'Distance':
-        return Distance(dist_km * 1000)
-
-    def m(self) -> int:
-        return int(self.dist_meters)
-
-    def km(self) -> int:
-        return int(self.dist_meters / 1000)
-
-
-@dataclass(frozen=True)
-class MaxDistance:
-    x: float
-    y: float
-    max_angle: float
-
-    @staticmethod
-    def from_distance(dist: Distance, render_area: RenderArea):
-        x = dist.km() * render_area.width_px / render_area.height_px
-        y = dist.km()
-        max_angle = math.asin(x / math.sqrt(x ** 2 + y ** 2))
-        return MaxDistance(x, y, max_angle)
+from citylines.gtfs.domain import Point, MaxDistance
 
 
 def _get_distance_from_lat_lon_in_km(point1: Point, point2: Point):
