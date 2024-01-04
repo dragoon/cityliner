@@ -23,6 +23,7 @@ Each primary mode of transportation, as defined in GTFS terms, is represented by
 - Renders result as a PDF.
 - Multiple color schemes: default, pastel, inferno, earthy, cool.
 - Water body visualization (beta).
+- Administrative borders (beta).
 
 ## Installation and Setup
 
@@ -54,7 +55,8 @@ python main.py --gtfs gtfs/[place-name] --center [center_coordinates] --poster [
 - `--width`: Width of the output drawing (in px).
 - `--height`: Height of the output drawing (in px)
 - `--poster`: Create a drawing for A0 poster size.
-- `--water`: Add water bodies to the poster (beta).
+- `--water`: Plot water bodies (beta).
+- `--admin-borders`: Plot administrative borders of the city/region determined by the center coordinates (beta).
 - `--color-scheme`: Choose a color scheme for the poster. Allowed values are: `default`, `pastel`, `inferno`, `earthy`, `cool`. Default is `default`.
 - `--logos`: List of logos for the poster (inside `./assets/logos/{place-name}/`)
 
