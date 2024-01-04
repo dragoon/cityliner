@@ -149,7 +149,6 @@ class Poster:
         max_trips = self.get_max_lines()
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
-        c.scale(1, -1)
 
         with open(self.input_dir / "data.lines", 'r') as file:
             for lineS in file:
@@ -198,7 +197,6 @@ class Poster:
     def _draw_water_bodies(self, c):
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
-        c.scale(1, -1)
 
         with open(self.input_dir / "water_bodies_osm.json", 'r') as f:
             water_bodies = json.load(f)
@@ -230,7 +228,6 @@ class Poster:
     def _draw_admin_borders(self, c):
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
-        c.scale(1, -1)
 
         with open(self.input_dir / "borders_osm.json", 'r') as f:
             way_paths = json.load(f)

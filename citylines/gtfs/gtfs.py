@@ -182,6 +182,6 @@ def get_route_type_for_shape_id(shape_id, route_types):
 
 
 def coord2px(lat: float, lng: float, bbox: BoundingBox):
-    coord_x = bbox.width / 2 + (lng - bbox.center.lon) * bbox.scale_factor_lon
-    coord_y = bbox.height / 2 - (lat - bbox.center.lat) * bbox.scale_factor_lat
+    coord_x = (lng - bbox.center.lon) * bbox.scale_factor_lon
+    coord_y = (lat - bbox.center.lat) * bbox.scale_factor_lat
     return {'x': int(coord_x), 'y': int(coord_y)}
