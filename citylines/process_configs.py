@@ -9,16 +9,16 @@ from citylines.util.colors import color_schemes
 PLACE_CONFIGS = {
     "wroclaw": {
         "center": Point(51.1094782, 17.0108073),
-        "distances": [10, 20, 30],
-        "logos": [],
+        "distances": [20, 30],
+        "logos": ["wroclaw.svg"],
         "gtfs": "wroclaw",
         "color_scheme": "pastel",
         "text": """Wrocław public transport routes"""
     },
     "warsaw": {
         "center": Point(52.228865, 21.0006369),
-        "distances": [20, 30],
-        "logos": [],
+        "distances": [20, 30, 50],
+        "logos": ["warsaw.svg", "wtp_logo.svg"],
         "gtfs": "warsaw",
         "color_scheme": "pastel",
         "text": """Warsaw public transport routes"""
@@ -40,7 +40,7 @@ PLACE_CONFIGS = {
     },
     "fribourg": {
         "center": Point(46.806477, 7.161972),
-        "distances": [10, 20, 30],
+        "distances": [10, 20],
         "logos": ["kanton_fribourg.svg", "logo-fribourg-en.svg"],
         "gtfs": "switzerland",
         "text": """Based on GTFS feed by Swiss Federal Railways\nFribourg public transport routes"""
@@ -61,7 +61,7 @@ PLACE_CONFIGS = {
     },
     "geneva": {
         "center": Point(46.204391, 6.143158),
-        "distances": [20, 30, 50],
+        "distances": [10, 20],
         "logos": ["kanton_geneva.svg"],
         "gtfs": "switzerland",
         "text": """Based on GTFS feed by Swiss Federal Railways\nGeneva public transport routes"""
@@ -123,7 +123,7 @@ PLACE_CONFIGS = {
         "distances": [30, 50],
         "logos": ["prague.svg", "pid.svg"],
         "gtfs": "prague",
-        "text": """Based on GTFS feed by NS\nUtrecht public transport routes"""
+        "text": """Based on GTFS feed by NS\nPrague public transport routes"""
     }
 }
 
@@ -148,11 +148,12 @@ if __name__ == "__main__":
                                gtfs_dir=f"./gtfs/{place_config['gtfs']}",
                                max_dist_y=Distance.from_km(max_dist),
                                render_area=render_area,
-                               add_water=True)
+                               add_water=True,
+                               add_borders=True)
 
             p = Poster(render_area, out_path=Path(f"./posters/{name}-{max_dist}.pdf"),
                        input_dir=out_dir, city=name,
                        logos=place_config["logos"],
                        text="")
             color_scheme = color_schemes[place_config.get("color_scheme", "default")]
-            p.generate_single(add_water=True, color_scheme=color_scheme)
+            p.generate_single(add_water=True, color_scheme=color_scheme, add_admin_borders=True)

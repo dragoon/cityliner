@@ -61,7 +61,7 @@ class Poster:
             total_w += provider_w + self.logo_gap
         return total_w
 
-    def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False):
+    def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False, add_admin_borders: bool = False):
         pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
         pdfmetrics.registerFont(TTFont('Garamond', 'assets/fonts/EBGaramond-VariableFont_wght.ttf'))
 
@@ -77,6 +77,8 @@ class Poster:
 
         if add_water:
             self._draw_water_bodies(c)
+        if add_admin_borders:
+            self._draw_admin_borders(c)
         self._draw_routes(c, color_scheme)
 
         c.setFont("Lato", self.font_size)
@@ -147,7 +149,6 @@ class Poster:
         max_trips = self.get_max_lines()
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
-        c.scale(1, -1)
 
         with open(self.input_dir / "data.lines", 'r') as file:
             for lineS in file:
@@ -196,7 +197,6 @@ class Poster:
     def _draw_water_bodies(self, c):
         c.saveState()
         c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
-        c.scale(1, -1)
 
         with open(self.input_dir / "water_bodies_osm.json", 'r') as f:
             water_bodies = json.load(f)
@@ -222,6 +222,31 @@ class Poster:
                         polygon = Polygon(int_points, fillColor='#000000')
                         d.add(polygon)
         renderPDF.draw(d, c, 0, 0)
+
+        c.restoreState()
+
+    def _draw_admin_borders(self, c):
+        c.saveState()
+        c.translate(self.render_area.width_px / 2, self.render_area.height_px / 2)
+
+        with open(self.input_dir / "borders_osm.json", 'r') as f:
+            way_paths = json.load(f)
+
+        c.setStrokeColorRGB(150, 150, 150)
+        c.setLineWidth(20)
+
+        for way_path in way_paths:
+            if not way_path:
+                continue
+
+            path = c.beginPath()
+            path.moveTo(way_path[0]['x'], way_path[0]['y'])
+
+            for node in way_path[1:]:
+                path.lineTo(node['x'], node['y'])
+
+            c.drawPath(path)
+            path.close()
 
         c.restoreState()
 
