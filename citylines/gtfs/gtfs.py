@@ -88,8 +88,7 @@ class GTFSDataset:
         logging.debug("Finished shape iteration")
         return sequences
 
-    def compute_segments(self, center: Point, bbox: BoundingBox,
-                         max_dist: MaxDistance) -> SegmentsDataset:
+    def compute_segments(self, center: Point, max_dist: MaxDistance) -> SegmentsDataset:
         route_types, trips_on_a_shape = self._get_trips_and_routes()
         sequences = self._get_sequences(center, max_dist)
         segments = []
@@ -143,8 +142,7 @@ class GTFSDataset:
         logging.debug(f"max trips per segment: {max_trips}")
         logging.debug(f"min trips per segment: {min_trips}")
 
-        return SegmentsDataset(segments, bbox,
-                               max_trips, min_trips)
+        return SegmentsDataset(segments, max_trips, min_trips)
 
     @staticmethod
     def from_path(gtfs_folder: str) -> 'GTFSDataset':
