@@ -18,7 +18,7 @@ def _parse_osm_borders(osm_data: dict, bbox: BoundingBox) -> list:
 
 def get_osm_admin_borders(place_id: str, bbox: BoundingBox) -> list:
     # Overpass API URL
-    url = "http://overpass-api.de/api/interpreter"
+    url = "https://overpass-api.de/api/interpreter"
 
     # Overpass QL query to fetch administrative borders
     query = f"""
@@ -37,4 +37,4 @@ def get_osm_admin_borders(place_id: str, bbox: BoundingBox) -> list:
         return _parse_osm_borders(response.json(), bbox)
     else:
         print("Error:", response.status_code, response.reason)
-        return {}
+        return []
