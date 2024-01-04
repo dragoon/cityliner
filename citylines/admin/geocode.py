@@ -27,5 +27,5 @@ def get_place_relation_id(lat, lon) -> str | None:
             logging.debug(f"OSM Relation found for {data['display_name']}, id: {data['osm_id']}")
             return data['osm_id']
     else:
-        print("Error:", response.status_code, response.reason)
+        logging.error("Geocoding error:", response.status_code, response.reason)
     return None
