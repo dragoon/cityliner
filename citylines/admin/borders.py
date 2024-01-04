@@ -1,3 +1,5 @@
+import logging
+
 import requests
 
 from citylines.gtfs.gtfs import BoundingBox, coord2px
@@ -36,5 +38,4 @@ def get_osm_admin_borders(place_id: str, bbox: BoundingBox) -> list:
     if response.status_code == 200:
         return _parse_osm_borders(response.json(), bbox)
     else:
-        print("Error:", response.status_code, response.reason)
-        return []
+        raise Exception(f"Overpass response error {response.status_code}: {response.text}")
