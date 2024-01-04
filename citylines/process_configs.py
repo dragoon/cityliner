@@ -123,7 +123,7 @@ PLACE_CONFIGS = {
         "distances": [30, 50],
         "logos": ["prague.svg", "pid.svg"],
         "gtfs": "prague",
-        "text": """Based on GTFS feed by NS\nUtrecht public transport routes"""
+        "text": """Based on GTFS feed by NS\nPrague public transport routes"""
     }
 }
 
