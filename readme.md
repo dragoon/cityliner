@@ -100,13 +100,12 @@ This source code is licensed under GNU GPLv3. See the `LICENSE` file for more de
 	Roman Prokofyev <https://prokofyev.ch/>
 
 ## Acknowledgements
-This project is inspired by Michael Mueller's [gtfs-visualizations](https://github.com/cmichi/gtfs-visualizations) repository (implemented with Node.js and Processing),
-and my fork: https://github.com/dragoon/gtfs-visualizations,
+This project is inspired by Michael Mueller's [gtfs-visualizations](https://github.com/cmichi/gtfs-visualizations) project, implemented with Node.js and [Processing](https://processing.org/), and my fork: https://github.com/dragoon/gtfs-visualizations,
 which allowed to process large GTFS files, added actual poster-generation code,
 and a possibility to restrict the visualization area within a certain radius, among other improvements.
 
-This implementation has been designed from scratch with Python,
-with ReportLab used for PDF rendering, and adds a possibility to visualize water bodies using OpenSteetMap data, among other changes.
+This implementation has been developed from scratch with Python,
+ReportLab for PDF rendering, different color palettes, and a possibility to visualize water bodies using OpenSteetMap data, among other changes.
 
 
 
