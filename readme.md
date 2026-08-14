@@ -12,8 +12,8 @@ bus, ferry, and cable routes fit together.
 ## Actions
 
 - **Generate a poster:** bring a GTFS feed and export a high-resolution PDF.
-- **[Open the showcase](docs/):** see example posters and commercial options.
-- **[Open a city request](https://github.com/dragoon/cityliner/issues/new):** include the city, GTFS source, center coordinates, and whether the feed has `shapes.txt`.
+- **[Open the showcase](https://dragoon.github.io/cityliner/):** see example posters and commercial options.
+- **[Open a city request](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml):** include the city, GTFS source, center coordinates, and whether the feed has `shapes.txt`.
 - **[Commission a print-ready poster](https://prokofyev.ch/):** request custom city, region, or transit-network work.
 - **Add a city config:** add a repeatable setup for another city and submit a pull request.
 
@@ -110,7 +110,7 @@ Line weight and opacity show service frequency on each route segment.
 Forks, issues, and pull requests are welcome. Useful contributions include city configs,
 setup fixes, color schemes, preview generation, and license notes for public data sources.
 
-For city requests, [open an issue](https://github.com/dragoon/cityliner/issues/new) with the city name,
+For city requests, [open an issue](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml) with the city name,
 GTFS source, center coordinates, and whether the feed includes `shapes.txt`.
 
 ## License
