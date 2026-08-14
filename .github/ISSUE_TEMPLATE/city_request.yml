@@ -1,0 +1,82 @@
+name: City request
+description: Request a Cityliner poster for a city, region, or transit network.
+title: "City request: "
+labels: ["city request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for requesting a city. Good GTFS data is the main thing Cityliner needs.
+
+        If the feed has `shapes.txt`, the result is much more likely to work.
+
+  - type: input
+    id: place
+    attributes:
+      label: City, region, or network
+      description: Name the place or transit network.
+      placeholder: "Helsinki, Zurich, Berlin, Ile-de-France..."
+    validations:
+      required: true
+
+  - type: input
+    id: gtfs
+    attributes:
+      label: GTFS feed URL
+      description: Link to the GTFS feed or catalog page.
+      placeholder: "https://..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: shapes
+    attributes:
+      label: Does the feed include shapes.txt?
+      options:
+        - "Yes"
+        - "No"
+        - "I don't know"
+    validations:
+      required: true
+
+  - type: input
+    id: center
+    attributes:
+      label: Center coordinates
+      description: Use latitude,longitude. This defines the poster center.
+      placeholder: "60.1706017,24.9414482"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: radius
+    attributes:
+      label: Preferred radius
+      description: Maximum distance from the center on the y-axis.
+      options:
+        - "20 km"
+        - "30 km"
+        - "50 km"
+        - "Other / not sure"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: output
+    attributes:
+      label: Intended output
+      options:
+        - "Open-source gallery preview"
+        - "Personal poster"
+        - "Print-ready commission"
+        - "Research or editorial use"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Add data license notes, city boundary preferences, logo permissions, or visual references.
+      placeholder: "Use no logos. Prefer a 30 km radius. The feed license is..."
