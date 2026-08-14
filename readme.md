@@ -1,26 +1,48 @@
-![City Pane Trio](gallery/city_pane_trio.png)
-
 # Cityliner
 
-Create colorful visualizations of public transport from GTFS (General Transit Feed Specification) public transport datasets.
-Public transport routes drawn on a map, where the thickness and opacity of the lines
-is determined by the frequency of the schedules along that route segment.
-Each primary mode of transportation, as defined in GTFS terms, is represented by a unique color.
+![Cityliner city pulse posters: Berlin, Helsinki, and Tallinn](gallery/city_pane_trio.png)
+
+Cityliner turns public transport schedules into high-resolution city posters.
+It reads GTFS (General Transit Feed Specification) feeds and draws route segments on a map.
+Line thickness and opacity show how often vehicles run there.
+
+Use it to see which corridors carry the city, where the network thins out, and how rail, tram,
+bus, ferry, and cable routes fit together.
+
+## Actions
+
+- **Generate a poster:** bring a GTFS feed and export a high-resolution PDF.
+- **[Open the showcase](docs/):** see example posters and commercial options.
+- **[Open a city request](https://github.com/dragoon/cityliner/issues/new):** include the city, GTFS source, center coordinates, and whether the feed has `shapes.txt`.
+- **[Commission a print-ready poster](https://prokofyev.ch/):** request custom city, region, or transit-network work.
+- **Add a city config:** add a repeatable setup for another city and submit a pull request.
+
+## Public Project and Commercial Use
+
+This repository contains the open-source Cityliner engine. It does not include raw GTFS feeds,
+processed data, print masters, customer files, or commercial workflow.
+
+The code is GPLv3. Gallery images are Creative Commons Attribution 4.0 unless noted otherwise.
+GTFS feeds, map data, city/agency logos, and transit brand marks can have their own licenses and
+permissions. For commercial posters, use logo-free layouts unless you have explicit
+permission to use the relevant marks.
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Installation and Setup](#installation-and-setup)
-3. [Usage](#usage)
-4. [Gallery](#gallery)
-5. [Contribution](#contribution)
-6. [License](#license)
-7. [Acknowledgements](#acknowledgements)
+1. [Actions](#actions)
+2. [Public Project and Commercial Use](#public-project-and-commercial-use)
+3. [Features](#features)
+4. [Installation and Setup](#installation-and-setup)
+5. [Usage](#usage)
+6. [Gallery](#gallery)
+7. [Contribution](#contribution)
+8. [License](#license)
+9. [Acknowledgements](#acknowledgements)
 
 ## Features
 
-- Visualize GTFS routes based on their frequency and route types.
-- Renders result as a PDF.
+- Draw GTFS routes by frequency and route type.
+- Export a high-resolution PDF.
 - Multiple color schemes: default, pastel, inferno, earthy, cool.
 - Water body visualization (beta).
 - Administrative borders (beta).
@@ -36,13 +58,13 @@ Each primary mode of transportation, as defined in GTFS terms, is represented by
    ```shell
    pip install -r requirements.txt
    ```
-3. Download Ocean shape file from OpenStreetMap: https://osmdata.openstreetmap.de/data/water-polygons.html (WGS84 Projection) and unzip it into the `oceans` directory.
-4. Download GTFS data with ``shapes.txt`` file available, see catalog here: https://github.com/MobilityData/mobility-database-catalogs.
-   And place it under ``gtfs/[place-name]/**``
-5. Download some city/transport company logos if needed and place into ``assets/logos/[place-name]/**``.
+3. Download the ocean shape file from OpenStreetMap: https://osmdata.openstreetmap.de/data/water-polygons.html (WGS84 projection) and unzip it into the `oceans` directory.
+4. Download GTFS data with `shapes.txt`. Start with the MobilityData catalog: https://github.com/MobilityData/mobility-database-catalogs.
+   Place the feed under `gtfs/[place-name]/**`.
+5. Add city or transport agency logos only if you have permission to use them, and place them under ``assets/logos/[place-name]/**``.
 
 ## Usage
-Run the script using the following command:
+Run:
 ```shell
 python main.py --gtfs gtfs/[place-name] --center [center_coordinates] --poster [other_options]
 ```
@@ -66,9 +88,11 @@ Example Helsinki:
 ```shell
 python main.py --gtfs=./gtfs/helsinki --place-name=helsinki --center=60.1706017,24.9414482 --poster --color-scheme=pastel --water --logos "helsinki.svg" "hsl.svg"
 ```
-See configs for other cities in https://github.com/dragoon/cityliner/blob/master/citylines/process_configs.py
+See city configs in https://github.com/dragoon/cityliner/blob/master/citylines/process_configs.py
 
 ## Gallery
+
+Line weight and opacity show service frequency on each route segment.
 
 <p align="middle">
 <img width="48%" src="gallery/zurich_30_inferno.png" alt="Zürich 30km Inferno Scheme Poster"/>
@@ -83,7 +107,11 @@ See configs for other cities in https://github.com/dragoon/cityliner/blob/master
 
 ## Contribution
 
-Feel free to fork this repository, open issues, or submit pull requests. Any contribution is welcome!
+Forks, issues, and pull requests are welcome. Useful contributions include city configs,
+setup fixes, color schemes, preview generation, and license notes for public data sources.
+
+For city requests, [open an issue](https://github.com/dragoon/cityliner/issues/new) with the city name,
+GTFS source, center coordinates, and whether the feed includes `shapes.txt`.
 
 ## License
 
@@ -107,6 +135,3 @@ and a possibility to restrict the visualization area within a certain radius, am
 
 This implementation has been designed from scratch with Python,
 with ReportLab used for PDF rendering, and adds a possibility to visualize water bodies using OpenSteetMap data, among other changes.
-
-
-
