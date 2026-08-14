@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cityliner - Public Transport City Posters</title>
+  <meta name="description" content="Cityliner turns GTFS public transport schedules into high-resolution city posters.">
+  <meta property="og:title" content="Cityliner">
+  <meta property="og:description" content="Public transport schedules turned into high-resolution city posters.">
+  <meta property="og:image" content="../gallery/city_pane_trio.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#050506] text-[#f3f0ea] antialiased">
+  <header class="fixed inset-x-0 top-0 z-20 border-b border-white/10 bg-[#050506]/75 backdrop-blur">
+    <nav class="mx-auto flex min-h-16 w-full max-w-[1120px] items-center justify-between gap-6 px-4" aria-label="Primary navigation">
+      <a class="font-extrabold no-underline" href="#">Cityliner</a>
+      <div class="flex items-center gap-4 text-sm text-[#b8b2a8] sm:gap-5">
+        <a class="hidden no-underline hover:text-[#f3f0ea] sm:inline" href="#gallery">View posters</a>
+        <a class="hidden no-underline hover:text-[#f3f0ea] sm:inline" href="#how">See the method</a>
+        <a class="no-underline hover:text-[#f3f0ea]" href="https://github.com/dragoon/cityliner">View the code</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="relative grid min-h-[82svh] items-end overflow-hidden px-4 pb-14 pt-24 sm:min-h-[86svh] sm:pt-[120px]" aria-labelledby="hero-title">
+      <img class="absolute inset-0 h-full w-full object-cover" src="../gallery/city_pane_trio.png" alt="">
+      <div class="absolute inset-0 bg-gradient-to-b from-[#050506]/10 via-[#050506]/30 to-[#050506]/95"></div>
+      <div class="relative mx-auto w-full max-w-[1120px]">
+        <p class="mb-3 text-[13px] font-extrabold uppercase text-[#f3c64e]">GTFS to city posters</p>
+        <h1 id="hero-title" class="mb-5 max-w-[880px] text-[44px] font-extrabold leading-[0.94] sm:text-[72px] lg:text-[104px]">Public transport schedules, drawn as city posters.</h1>
+        <p class="mb-7 max-w-[660px] text-lg text-[#eee8dd] sm:text-2xl">Cityliner maps route frequency from GTFS feeds. Thick, bright lines show where vehicles run most often.</p>
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <a class="inline-flex min-h-[46px] items-center justify-center rounded-lg bg-[#f3f0ea] px-5 font-bold text-[#08090b] no-underline hover:-translate-y-px" href="https://github.com/dragoon/cityliner/issues/new">Request a city</a>
+          <a class="inline-flex min-h-[46px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-5 font-bold text-[#f3f0ea] no-underline hover:-translate-y-px" href="https://prokofyev.ch/">Commission a print-ready poster</a>
+          <a class="inline-flex min-h-[46px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-5 font-bold text-[#f3f0ea] no-underline hover:-translate-y-px" href="https://github.com/dragoon/cityliner">View the code on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery" class="px-4 py-[72px]" aria-labelledby="gallery-title">
+      <div class="mx-auto w-full max-w-[1120px]">
+        <div class="mb-7 gap-6 md:flex md:items-end md:justify-between">
+          <h2 id="gallery-title" class="text-[30px] font-extrabold leading-none sm:text-[44px] lg:text-[54px]">City Pulse Atlas</h2>
+          <p class="mt-4 max-w-[430px] text-[#b8b2a8] md:mt-0">Each image uses the same rule: more service means a stronger line.</p>
+        </div>
+
+        <div class="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+          <figure class="overflow-hidden rounded-lg border border-white/15 bg-[#111318]">
+            <img class="aspect-[1000/1414] w-full object-cover" src="../gallery/berlin_50_cool.png" alt="Berlin public transport frequency poster">
+            <figcaption class="flex items-center justify-between gap-3 px-3 py-3.5 text-sm text-[#b8b2a8]"><strong class="text-base text-[#f3f0ea]">Berlin</strong><span>50 km</span></figcaption>
+          </figure>
+          <figure class="overflow-hidden rounded-lg border border-white/15 bg-[#111318]">
+            <img class="aspect-[1000/1414] w-full object-cover" src="../gallery/helsinki_30_default.png" alt="Helsinki public transport frequency poster">
+            <figcaption class="flex items-center justify-between gap-3 px-3 py-3.5 text-sm text-[#b8b2a8]"><strong class="text-base text-[#f3f0ea]">Helsinki</strong><span>30 km</span></figcaption>
+          </figure>
+          <figure class="overflow-hidden rounded-lg border border-white/15 bg-[#111318]">
+            <img class="aspect-[1000/1414] w-full object-cover" src="../gallery/tallinn_30_pastel.png" alt="Tallinn public transport frequency poster">
+            <figcaption class="flex items-center justify-between gap-3 px-3 py-3.5 text-sm text-[#b8b2a8]"><strong class="text-base text-[#f3f0ea]">Tallinn</strong><span>30 km</span></figcaption>
+          </figure>
+          <figure class="overflow-hidden rounded-lg border border-white/15 bg-[#111318]">
+            <img class="aspect-[1000/1414] w-full object-cover" src="../gallery/zurich_30_inferno.png" alt="Zurich public transport frequency poster">
+            <figcaption class="flex items-center justify-between gap-3 px-3 py-3.5 text-sm text-[#b8b2a8]"><strong class="text-base text-[#f3f0ea]">Zurich</strong><span>30 km</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="px-4 py-[72px]" aria-labelledby="how-title">
+      <div class="mx-auto w-full max-w-[1120px]">
+        <div class="mb-7 gap-6 md:flex md:items-end md:justify-between">
+          <h2 id="how-title" class="text-[30px] font-extrabold leading-none sm:text-[44px] lg:text-[54px]">How It Works</h2>
+          <p class="mt-4 max-w-[430px] text-[#b8b2a8] md:mt-0">The poster is data-driven. The visual style comes after the network is measured.</p>
+        </div>
+
+        <div class="grid gap-3.5 md:grid-cols-3">
+          <article class="min-h-[190px] rounded-lg border border-white/15 bg-[#111318] p-6">
+            <span class="mb-10 block font-extrabold text-[#54d39b]">01</span>
+            <h3 class="mb-2.5 text-[22px] font-bold">Read GTFS</h3>
+            <p class="text-[#b8b2a8]">Cityliner loads routes, shapes, trips, and schedules from a public transport feed.</p>
+          </article>
+          <article class="min-h-[190px] rounded-lg border border-white/15 bg-[#111318] p-6">
+            <span class="mb-10 block font-extrabold text-[#54d39b]">02</span>
+            <h3 class="mb-2.5 text-[22px] font-bold">Measure service</h3>
+            <p class="text-[#b8b2a8]">It counts how often route segments are used within the selected area.</p>
+          </article>
+          <article class="min-h-[190px] rounded-lg border border-white/15 bg-[#111318] p-6">
+            <span class="mb-10 block font-extrabold text-[#54d39b]">03</span>
+            <h3 class="mb-2.5 text-[22px] font-bold">Draw the poster</h3>
+            <p class="text-[#b8b2a8]">It exports a high-resolution PDF with route colors, water, borders, and optional logos.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 py-[72px]" aria-labelledby="commission-title">
+      <div class="mx-auto grid w-full max-w-[1120px] items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)]">
+        <div class="overflow-hidden rounded-lg border border-white/15 bg-[#111318]">
+          <img class="aspect-[2035/1414] w-full object-cover" src="../gallery/city_pane_duo.png" alt="Two Cityliner poster previews">
+        </div>
+        <div>
+          <p class="mb-3 text-[13px] font-extrabold uppercase text-[#f3c64e]">Custom work</p>
+          <h2 id="commission-title" class="text-[30px] font-extrabold leading-none sm:text-[44px] lg:text-[54px]">Order a city, region, or transit network.</h2>
+          <ul class="my-6 grid list-none gap-3 p-0">
+            <li class="border-t border-white/15 py-4 text-[#b8b2a8]"><strong class="block text-lg text-[#f3f0ea]">Open-source city request</strong>Best when the GTFS feed is public and the result can be shared.</li>
+            <li class="border-t border-white/15 py-4 text-[#b8b2a8]"><strong class="block text-lg text-[#f3f0ea]">Print-ready poster</strong>Best for personal prints, gifts, office walls, and exhibitions.</li>
+            <li class="border-t border-white/15 py-4 text-[#b8b2a8]"><strong class="block text-lg text-[#f3f0ea]">Data-viz commission</strong>Best for reports, campaigns, agencies, and transport research.</li>
+          </ul>
+          <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <a class="inline-flex min-h-[46px] items-center justify-center rounded-lg bg-[#f3f0ea] px-5 font-bold text-[#08090b] no-underline hover:-translate-y-px" href="https://prokofyev.ch/">Commission a poster</a>
+            <a class="inline-flex min-h-[46px] items-center justify-center rounded-lg border border-white/15 bg-white/10 px-5 font-bold text-[#f3f0ea] no-underline hover:-translate-y-px" href="https://github.com/dragoon/cityliner/issues/new">Open a city request</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="border-t border-white/15 bg-[#0c0d10] px-4 py-[72px]" aria-labelledby="license-title">
+      <div class="mx-auto grid w-full max-w-[1120px] items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto]">
+        <div>
+          <h2 id="license-title" class="text-[30px] font-extrabold leading-none sm:text-[44px] lg:text-[54px]">Public engine. Private production.</h2>
+          <p class="mt-4 max-w-[640px] text-[#b8b2a8]">The code is public. Raw feeds, processed data, print masters, customer files, and commercial workflow stay private. Commercial posters use logo-free layouts unless logo rights are confirmed.</p>
+        </div>
+        <a class="inline-flex min-h-[46px] items-center justify-center rounded-lg bg-[#f3f0ea] px-5 font-bold text-[#08090b] no-underline hover:-translate-y-px" href="https://github.com/dragoon/cityliner">Use the open-source engine</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/15 px-4 py-6 text-sm text-[#b8b2a8]">
+    <div class="mx-auto w-full max-w-[1120px] gap-5 sm:flex sm:justify-between">
+      <span>Cityliner by Roman Prokofyev</span>
+      <a class="block text-[#f3f0ea] no-underline sm:inline" href="https://github.com/dragoon/cityliner">github.com/dragoon/cityliner</a>
+    </div>
+  </footer>
+</body>
+</html>
