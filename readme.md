@@ -12,7 +12,7 @@ bus, ferry, and cable routes fit together.
 ## Actions
 
 - **Generate a poster:** bring a GTFS feed and export a high-resolution PDF.
-- **[Open the showcase](https://dragoon.github.io/cityliner/):** see example posters and commercial options.
+- **[Open the showcase](https://cityliner.prokofyev.ch/):** see example posters and commercial options.
 - **[Open a city request](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml):** include the city, GTFS source, center coordinates, and whether the feed has `shapes.txt`.
 - **[Commission a print-ready poster](https://prokofyev.ch/):** request custom city, region, or transit-network work.
 - **Add a city config:** add a repeatable setup for another city and submit a pull request.
