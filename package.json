@@ -1,0 +1,14 @@
+{
+  "name": "cityliner-site",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i docs/explore/styles.css -o docs/explore/explorer.css --minify",
+    "watch:css": "tailwindcss -i docs/explore/styles.css -o docs/explore/explorer.css --watch",
+    "test": "node --test tests/explorer_intensity.test.cjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "daisyui": "5.7.47",
+    "tailwindcss": "4.3.3"
+  }
+}
