@@ -64,8 +64,12 @@
       const requested=params.has("modes")?params.get("modes").split(","):manifest.modes;
       state.modes=new Set(requested.filter(m=>manifest.modes.includes(m)));
       $("city-title").textContent=manifest.title;
-      $("archive").textContent=`Schedule archive · ${manifest.dates[0].date} — ${manifest.dates.at(-1).date}`;
+      $("archive").textContent=`Schedule week · ${manifest.dates[0].date} — ${manifest.dates.at(-1).date}`;
       $("source").textContent=`${manifest.source}. Feed coverage ${manifest.feedCoverage.join(" — ")}. Times in ${manifest.timezone}.`;
+      const credits=[...(manifest.attributions||[])];
+      if(manifest.provenance)credits.push({name:`GTFS downloaded ${manifest.provenance.retrievedAt} · ${manifest.provenance.license}`,url:manifest.provenance.url});
+      if(manifest.waterSource)credits.push({name:`Water: ${manifest.waterSource.name} · ${manifest.waterSource.license} · data ${manifest.waterSource.dataTimestamp}`,url:manifest.waterSource.url});
+      $("attributions").replaceChildren(...credits.map(credit=>{const li=document.createElement("li");let url;try{url=new URL(credit.url);}catch{}if(url&&["https:","http:"].includes(url.protocol)){const a=document.createElement("a");a.href=url.href;a.textContent=credit.name;li.append(a);}else li.textContent=credit.name;return li;}));
       $("warnings").replaceChildren(...manifest.warnings.map(w=>{const li=document.createElement("li");li.textContent=w;return li;}));
       $("date").replaceChildren(...manifest.dates.map(d=>option(d.date,dateLabel(d.date))));
       if(manifest.dates.some(d=>d.date===params.get("date")))$("date").value=params.get("date");
@@ -227,6 +231,9 @@
     const filename=`cityliner-${state.manifest.city}-${$("date").value}.png`;
     const out=document.createElement("canvas");out.width=canvas.width;const c=out.getContext("2d");
     const paragraphs=[`Cityliner by Roman Prokofyev · ${$("date").value} · ${$("window").textContent}`,$("view-explanation").textContent,"Scheduled service; frequency-based services show expected departures.",state.manifest.source];
+    for(const credit of state.manifest.attributions||[])paragraphs.push(`${credit.name}${credit.url?" · "+credit.url:""}`);
+    if(state.manifest.provenance)paragraphs.push(`GTFS downloaded ${state.manifest.provenance.retrievedAt} · ${state.manifest.provenance.license} · ${state.manifest.provenance.url}`);
+    if(state.manifest.waterSource)paragraphs.push(`Water: ${state.manifest.waterSource.name} · ${state.manifest.waterSource.license} · data ${state.manifest.waterSource.dataTimestamp} · ${state.manifest.waterSource.url}`);
     const lines=[];c.font="14px sans-serif";
     for(const text of paragraphs){let line="";for(const word of text.split(" ")){if(c.measureText(line+word).width>out.width-48){lines.push(line);line="";}line+=word+" ";}lines.push(line);}
     out.height=canvas.height+50+lines.length*20;c.fillStyle="#080c13";c.fillRect(0,0,out.width,out.height);c.drawImage(canvas,0,0);
