@@ -50,7 +50,8 @@ permission to use the relevant marks.
 - Administrative borders (beta).
 - Static Time Explorer: local stop-to-stop timing, a 15-minute slider, playback,
   mode filters, shareable views, and credited PNG downloads. See the
-  [export guide](docs/explore/README.md) and [validation record](docs/explore/VALIDATION.md).
+  [export guide](docs/explore/README.md), [data sources](docs/explore/SOURCES.md),
+  and [testing guide](docs/explore/TESTING.md).
 
 ## Installation and Setup
 

@@ -6,13 +6,12 @@ One exporter and one static Canvas viewer serve every city. The existing
 The published schedules cover October 7–13, 2026, using feeds downloaded on
 October 6, 2026. The viewer displays their actual dates, feed coverage,
 download information, and exclusions. These are scheduled departures, not live
-transit information. See [SOURCES.md](SOURCES.md) for provenance and refresh
-instructions. Nothing has been deployed by this implementation.
+transit information. See [SOURCES.md](SOURCES.md) for attribution, licenses,
+and coverage.
 
 ## Run locally
 
-Python 3.11 is the verified environment. This checkout's old `venv` was broken;
-a clean `.venv` has been created and the integration checks use it.
+Use Python 3.11 and create a local environment:
 
 ```sh
 uv venv --python 3.11 .venv
@@ -29,6 +28,8 @@ The browser must support Canvas, Path2D, and gzip `DecompressionStream`.
 Use an extracted GTFS directory or a ZIP with GTFS files at its root. Supply a
 week entirely inside the feed's calendar coverage and an attribution suitable
 for publishing the derived output. A city identifier must be a lowercase slug.
+Prepare the provenance and water files using the refresh instructions below;
+both options can be omitted when generating a basic preview.
 
 ```sh
 .venv/bin/python -m citylines.explorer.export \
@@ -37,8 +38,8 @@ for publishing the derived output. A city identifier must be a lowercase slug.
   --center 52.52493,13.36963 --max-dist 30 \
   --week-start 2026-10-07 --color-scheme cool \
   --attribution 'Verkehrsverbund Berlin-Brandenburg (VBB), CC BY 4.0 · © OpenStreetMap contributors' \
-  --provenance ./gtfs/refresh-2026-10-06/berlin-provenance.json \
-  --water ./processed/explorer/refresh-2026-10-06/berlin-water.json \
+  --provenance ./gtfs/berlin-provenance.json \
+  --water ./processed/explorer/berlin-water.json \
   --output-dir ./processed/explorer/berlin
 
 .venv/bin/python -m citylines.explorer.export \
@@ -47,13 +48,13 @@ for publishing the derived output. A city identifier must be a lowercase slug.
   --center 52.228865,21.0006369 --max-dist 30 \
   --week-start 2026-10-07 --color-scheme pastel \
   --attribution 'Zarząd Transportu Miejskiego w Warszawie (ZTM / WTP) · © OpenStreetMap contributors' \
-  --provenance ./gtfs/refresh-2026-10-06/warsaw-provenance.json \
-  --water ./processed/explorer/refresh-2026-10-06/warsaw-water.json \
+  --provenance ./gtfs/warsaw-provenance.json \
+  --water ./processed/explorer/warsaw-water.json \
   --output-dir ./processed/explorer/warsaw
 ```
 
-These dates match the refreshed feeds in this checkout. On the next refresh,
-choose a covered week instead. `--max-dist` is the half-width of a square map
+The example dates match the included demo bundles. For another feed version,
+choose a week covered by its calendar. `--max-dist` is the half-width of a square map
 in kilometres, using a local metric projection. The camera stays fixed at
 those bounds. V1 limits radius to 250 km, latitude to below 80° absolute,
 and excludes maps crossing the antimeridian.
@@ -80,7 +81,7 @@ Stage only a reviewed derived bundle into the local viewer:
 Use the bundle path printed by your export. This command copies a whitelist of
 derived assets into `docs/explore/data` and updates `catalog.json`; it does
 **not** deploy the site. After release, retain published versions so shared
-links keep working. The unreleased archive demos are kept privately for this refresh. Raw feeds, SQLite caches, audit working files, and poster outputs stay
+links keep working. Raw feeds, SQLite caches, audit working files, and poster outputs stay
 under ignored directories. Source feed licenses still govern their derived use.
 
 ## Schedule and geometry rules
@@ -169,13 +170,58 @@ PNG export includes the selected date/window, source, frequency explanation,
 the view and its scale/legend, and **Cityliner by Roman Prokofyev**. A visible download link remains available
 when a browser does not automatically start the download.
 
-See [VALIDATION.md](VALIDATION.md) for checks and benchmarks. Visitor uploads,
-vehicle animation, payments, comparisons, and Transit Portrait are outside V1.
+See [TESTING.md](TESTING.md) for automated checks and independent timetable
+audits. Visitor uploads, vehicle animation, payments, comparisons, and Transit
+Portrait are outside V1.
 
-The retained 1.0.0 bundles have no per-section peak metadata and open in
-Departures view. Old saved URLs keep working. Processor 1.1.0 reuses the
-unchanged raw staging format while generating new immutable bundle versions.
+## Refresh inputs
 
-Viewer assets use versioned URLs so an earlier cached renderer does not hide
-playback changes. The continuous viewer is version 1.2.0; derived bundles and
-processor remain 1.1.0 because the source schedule model did not change.
+Download feeds from the publishers listed in [SOURCES.md](SOURCES.md), or use
+another source whose license permits the intended publication. Inspect its
+calendar coverage and attribution records before selecting a new export week.
+
+Create a provenance JSON file in the location passed to `--provenance`, with
+these public metadata fields:
+
+```json
+{
+  "url": "https://unternehmen.vbb.de/gtfs",
+  "retrievedAt": "ACTUAL_DOWNLOAD_TIME_IN_ISO_8601",
+  "license": "CC-BY-4.0",
+  "licenseUrl": "https://unternehmen.vbb.de/digitale-services/datensaetze/"
+}
+```
+
+Use the actual UTC download time and source-specific license terms. The
+exporter includes this metadata in the manifest; source credits from
+`attributions.txt` are retained automatically.
+
+To refresh water, generate a query for the same center and radius:
+
+```sh
+.venv/bin/python -m citylines.explorer.water \
+  --center 52.52493,13.36963 --max-dist 30 \
+  --query-output gtfs/berlin-water.query
+
+curl -sS --fail --get \
+  -A 'Cityliner (https://github.com/dragoon/cityliner)' \
+  --data-urlencode data@gtfs/berlin-water.query \
+  -o gtfs/berlin-water.json https://overpass-api.de/api/interpreter
+
+.venv/bin/python -m citylines.explorer.water \
+  --input gtfs/berlin-water.json \
+  --center 52.52493,13.36963 --max-dist 30 \
+  --retrieved-at ACTUAL_DOWNLOAD_TIME_IN_ISO_8601 \
+  --endpoint https://overpass-api.de/api/interpreter \
+  --output processed/explorer/berlin-water.json
+```
+
+Replace the retrieval-time placeholder before conversion. Regional OSM water
+extracts are also supported: use `--shapefile PATH --data-timestamp
+PUBLISHED_OSM_TIME` instead of `--input`, and set `--endpoint` to the extract's
+source URL. The water polygon file must declare EPSG:4326. Source timestamps
+should come from the downloaded response or extract metadata.
+
+Validate the replacement bundle before updating the catalog. Keep raw feeds,
+water responses, and processing caches outside the published site. Retain
+previously published bundle versions for shared links.
