@@ -6,3 +6,4 @@ requests~=2.31.0
 geopandas~=0.14.1
 shapely~=2.0.2
 geopy~=2.4.1
+numpy>=1.24,<3

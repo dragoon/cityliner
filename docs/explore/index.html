@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Watch a city's scheduled transport network change through a day. Explore Cityliner by Roman Prokofyev.">
+  <title>Cityliner — A city through the day</title>
+  <link rel="stylesheet" href="explorer.css">
+  <script defer src="intensity.js?v=1.2.0"></script>
+  <script defer src="explorer.js?v=1.2.0"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a href="../" class="brand">Cityliner<span>by Roman Prokofyev</span></a>
+    <nav aria-label="Explorer navigation"><a href="../">Posters</a><a href="https://github.com/dragoon/cityliner">Open source ↗</a></nav>
+  </header>
+  <main>
+    <div class="intro"><p class="eyebrow">A city through the day</p><h1>Watch the network breathe.</h1><p>See where scheduled service intensifies, quiets down, or stays steady.</p></div>
+    <section class="workspace" aria-label="Transport time explorer">
+      <div class="map-head">
+        <div class="pickers">
+          <label>City<select id="city" disabled></select></label>
+          <label>Date<select id="date" disabled></select></label>
+        </div>
+        <div class="actions"><button id="share" disabled>Copy view link</button><button id="download" disabled>Save artwork</button></div>
+      </div>
+      <div class="map-wrap">
+        <canvas id="map" role="img" aria-label="Scheduled public transport intensity map"></canvas>
+        <div class="map-title" aria-hidden="true"><span id="city-title">Cityliner</span><small id="archive"></small></div>
+        <div id="loading" role="status" aria-live="polite">Loading cities…</div>
+        <div id="error" role="alert" hidden><p id="error-message"></p><button id="retry">Try again</button></div>
+        <p id="empty" hidden>No scheduled service in this window for the selected modes.</p>
+      </div>
+      <div class="timeline">
+        <button id="play" class="play" disabled aria-label="Play the selected day">Play day</button>
+        <div class="scrubber">
+          <div class="time-label"><label for="time">Scheduled service · next hour</label><output id="window" aria-live="polite">—</output></div>
+          <input id="time" type="range" min="0" max="95" value="32" step="1" disabled aria-label="Start time of the service window">
+          <div class="time-marks" aria-hidden="true"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span id="day-end">23:45</span></div>
+        </div>
+      </div>
+      <div class="options"><div id="modes" class="modes" aria-label="Transport modes"></div><div class="view-options"><label class="palette-label">View<select id="view" disabled><option value="rhythm">Daily rhythm</option><option value="change">Change from 08:00</option><option value="departures">Departures</option></select></label><label class="palette-label">Palette<select id="palette" disabled></select></label></div></div>
+      <p id="view-explanation" class="view-explanation"></p>
+      <p id="section-detail" class="section-detail" aria-live="polite">Hover or tap a line to see its routes and departures.</p>
+    </section>
+    <div class="notes">
+      <div><p class="eyebrow">The method</p><p>Daily rhythm uses fixed weekly peaks, keeping rare service subdued. Departures shows absolute intensity. Change from 08:00 highlights increases and decreases on the selected date. Playback blends adjacent samples; pause to read the source timetable counts.</p><p>Frequency-based services show expected departures. These are schedules, not live vehicle positions. Faint lines provide network context.</p></div>
+      <div><p class="eyebrow">Source & coverage</p><p id="source">—</p><details id="coverage"><summary>Data notes</summary><ul id="warnings"></ul></details></div>
+    </div>
+    <p id="action-status" role="status" aria-live="polite"></p>
+    <a id="artwork-link" hidden>Download PNG</a>
+  </main>
+  <footer><span>Cityliner by <a href="https://prokofyev.ch/">Roman Prokofyev</a></span><span>Built from public transport data.</span></footer>
+</body>
+</html>

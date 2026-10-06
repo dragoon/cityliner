@@ -12,6 +12,7 @@ bus, ferry, and cable routes fit together.
 ## Actions
 
 - **Generate a poster:** bring a GTFS feed and export a high-resolution PDF.
+- **[Build the Time Explorer](docs/explore/README.md):** export seven days of scheduled service into a static, interactive city map.
 - **[Open the showcase](https://cityliner.prokofyev.ch/):** see example posters and commercial options.
 - **[Open a city request](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml):** include the city, GTFS source, center coordinates, and whether the feed has `shapes.txt`.
 - **[Commission a print-ready poster](https://prokofyev.ch/):** request custom city, region, or transit-network work.
@@ -20,7 +21,8 @@ bus, ferry, and cable routes fit together.
 ## Public Project and Commercial Use
 
 This repository contains the open-source Cityliner engine. It does not include raw GTFS feeds,
-processed data, print masters, customer files, or commercial workflow.
+private processing caches, print masters, customer files, or commercial workflow.
+Selected derived schedule archives and their attribution are included under `docs/explore/data`.
 
 The code is GPLv3. Gallery images are Creative Commons Attribution 4.0 unless noted otherwise.
 GTFS feeds, map data, city/agency logos, and transit brand marks can have their own licenses and
@@ -46,6 +48,9 @@ permission to use the relevant marks.
 - Multiple color schemes: default, pastel, inferno, earthy, cool.
 - Water body visualization (beta).
 - Administrative borders (beta).
+- Static Time Explorer: local stop-to-stop timing, a 15-minute slider, playback,
+  mode filters, shareable views, and credited PNG downloads. See the
+  [export guide](docs/explore/README.md) and [validation record](docs/explore/VALIDATION.md).
 
 ## Installation and Setup
 
