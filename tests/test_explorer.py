@@ -150,3 +150,15 @@ def test_missing_required_input_is_actionable(feed):
 
 def test_route_types():
     assert [mode_for(v) for v in [0, 100, 401, 700, 1000, 1300, 9999]] == ["tram", "rail", "subway", "bus", "ferry_water", "funicular_cable_gondola", "other"]
+
+
+def test_feed_attributions_and_refresh_provenance_survive_export(feed, tmp_path):
+    table(feed, "attributions.txt", "organization_name,attribution_url,is_producer,is_authority",
+          [("Transit authority", "https://authority.example", 0, 1), ("GTFS converter", "https://publisher.example", 1, 0)])
+    provenance = {"url": "https://publisher.example/feed.zip", "retrievedAt": "2026-10-06T11:00:00Z", "license": "Test license"}
+    manifest, _, _ = export_feed(feed, "test", "Test", (0, .01), 2, date(2024, 1, 1), "default",
+                                 tmp_path / "out", "Transit authority", tmp_path / "cache", provenance=provenance)
+    assert manifest["source"] == "Transit authority"
+    assert manifest["attributions"][0]["authority"]
+    assert manifest["attributions"][1]["producer"]
+    assert manifest["provenance"] == provenance

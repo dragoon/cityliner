@@ -1,7 +1,7 @@
 from shapely.geometry import Polygon
 import pytest
 
-from citylines.explorer.water import build_water, query_for
+from citylines.explorer.water import build_shapefile_water, build_water, query_for
 
 
 def geometry(points):
@@ -38,3 +38,15 @@ def test_water_reports_unclosed_relations_instead_of_joining_them():
     with pytest.raises(ValueError, match="incomplete"):
         build_water({"remark": "runtime timeout", "elements": data["elements"]}, (0, 0), 2, "today", "endpoint")
     assert 'relation["natural"="water"]' in query_for((52, 21), 30)
+
+
+def test_regional_water_preserves_holes_and_clips(tmp_path):
+    import geopandas as gpd
+    polygon = Polygon([(0, 0), (.02, 0), (.02, .02), (0, .02)],
+                      [[(.004, .004), (.008, .004), (.008, .008), (.004, .008)]])
+    path = tmp_path / "water.geojson"
+    gpd.GeoDataFrame(geometry=[polygon], crs="EPSG:4326").to_file(path, driver="GeoJSON")
+    result = build_shapefile_water(path, (0, 0), 2, "2026-10-06", "https://download.example", "2026-10-05")
+    assert len(result["polygons"]) == 1
+    assert len(result["polygons"][0]) == 2
+    assert all(-2000 <= coord <= 2000 for ring in result["polygons"][0] for xy in ring for coord in xy)
