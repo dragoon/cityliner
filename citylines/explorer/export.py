@@ -52,7 +52,7 @@ def write_json(path, value):
 
 
 def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
-                output_dir, attribution="", cache_dir=Path("processed/explorer-cache"), water=None):
+                output_dir, attribution="", cache_dir=Path("processed/explorer-cache"), water=None, provenance=None):
     started = time.perf_counter()
     if not -80 < center[0] < 80 or not -180 <= center[1] <= 180 or not 0 < radius <= 250:
         raise ValueError("Use a center below 80° latitude and a radius of 0–250 km")
@@ -63,10 +63,15 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
         identity = {"version": VERSION, "feed": fingerprint, "center": center,
                     "radius": radius, "week": week_start.isoformat(), "palette": palette,
                     "place": place_name, "title": title, "attribution": attribution,
-                    "water": hashlib.sha256(Path(water).read_bytes()).hexdigest() if water and Path(water).is_file() else None}
+                    "water": hashlib.sha256(Path(water).read_bytes()).hexdigest() if water and Path(water).is_file() else None,
+                    "provenance": provenance}
         bundle_id = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:16]
         db = stage(feed, Path(cache_dir) / f"{STAGING_VERSION}-{fingerprint}.sqlite")
         agencies = list(feed.rows("agency.txt", ("agency_timezone",)))
+        credits = [{"name": r["organization_name"], "url": r.get("attribution_url", ""),
+                    "producer": r.get("is_producer") == "1", "authority": r.get("is_authority") == "1",
+                    "operator": r.get("is_operator") == "1", "dataSource": r.get("is_data_source") == "1"}
+                   for r in feed.rows("attributions.txt", ("organization_name",))]
         timezones = {a["agency_timezone"] for a in agencies}
         if len(timezones) != 1:
             raise ValueError("The feed must declare one shared agency timezone")
@@ -209,6 +214,7 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
             raise ValueError("No departures in the requested week and area")
         used_routes = {rid for s in sections for rid in s["routes"]}
         geometry = {"sections": sections, "routes": {rid: routes[rid] for rid in sorted(used_routes)}, "water": []}
+        water_source = None
         if water:
             try:
                 layer = json.loads(Path(water).read_text())
@@ -241,6 +247,10 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
                     if layer.get("center") != list(center) or layer.get("bounds") != bounds:
                         raise ValueError("Water cache projection does not match export")
                     geometry["water"] = layer["polygons"]
+                    water_source = layer.get("source")
+                    for reason, count in layer.get("diagnostics", {}).items():
+                        if reason != "processed_elements" and count:
+                            diagnostics[f"water_{reason}"] += count
             except (ValueError, KeyError, AttributeError, OSError) as exc:
                 diagnostics["water_cache_unavailable"] += 1
                 examples["water_cache_unavailable"] = [str(exc)]
@@ -278,6 +288,7 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
                     "bounds": bounds, "feedFingerprint": fingerprint,
                     "feedCoverage": [date.fromisoformat(f"{d[:4]}-{d[4:6]}-{d[6:]}").isoformat() for d in (start_date, end_date)],
                     "source": attribution or "; ".join(a.get("agency_name", "") for a in agencies),
+                    "attributions": credits, "provenance": provenance, "waterSource": water_source,
                     "dates": date_files, "geometry": "geometry.json.gz", "modes": sorted({s["mode"] for s in sections}),
                     "palette": palette, "palettes": palette_data, "windowSeconds": 3600,
                     "stepSeconds": 900, "intensityMaximum": maximum, "warnings": warnings,
@@ -310,6 +321,7 @@ def main():
     parser.add_argument("--color-scheme", choices=color_schemes, default="default")
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--attribution", default="")
+    parser.add_argument("--provenance", type=Path, help="Public source metadata JSON: url, retrievedAt, license and licenseUrl")
     parser.add_argument("--cache-dir", type=Path, default=Path("processed/explorer-cache"))
     parser.add_argument("--water", type=Path, help="Optional projected water cache; see explorer documentation")
     args = parser.parse_args()
@@ -319,7 +331,8 @@ def main():
             raise ValueError("Center must be latitude,longitude")
         export_feed(args.gtfs, args.place_name, args.title, center, args.max_dist,
                     args.week_start, args.color_scheme, args.output_dir, args.attribution,
-                    args.cache_dir, args.water)
+                    args.cache_dir, args.water,
+                    json.loads(args.provenance.read_text()) if args.provenance else None)
     except (ValueError, KeyError, OSError, sqlite3.Error, BadZipFile) as exc:
         parser.exit(2, f"Export failed: {exc}\n")
 
