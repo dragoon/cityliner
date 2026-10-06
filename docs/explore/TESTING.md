@@ -5,6 +5,8 @@ in [README.md](README.md):
 
 ```sh
 .venv/bin/python -m pytest -q tests
+npm ci
+npm run build:css
 node --check docs/explore/explorer.js
 node --test tests/explorer_intensity.test.cjs
 git diff --check

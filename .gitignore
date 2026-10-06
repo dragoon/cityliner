@@ -2,6 +2,7 @@ posters/
 venv
 .venv/
 .cache/
+node_modules/
 .idea/
 processed/
 oceans/

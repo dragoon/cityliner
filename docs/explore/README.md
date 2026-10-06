@@ -19,9 +19,30 @@ uv pip install --python .venv/bin/python -r requirements.txt pytest
 .venv/bin/python -m http.server 8765 --bind 127.0.0.1 --directory docs
 ```
 
-Open `http://127.0.0.1:8765/explore/`. No backend application or build step is
-required. Serve over HTTP rather than opening `index.html` as a local file.
+Open `http://127.0.0.1:8765/explore/`. The compiled stylesheet is included, so
+previewing the site requires no CSS build. Serve over HTTP rather than opening
+`index.html` as a local file.
 The browser must support Canvas, Path2D, and gzip `DecompressionStream`.
+
+## Edit the viewer styles
+
+The explorer uses Tailwind CSS 4 for layout and daisyUI 5 for buttons, selects,
+and the time slider. Its `cityliner` theme preserves the dark palette and uses
+pill-shaped controls. All CSS is compiled locally; the deployed page loads no
+styling library from a CDN.
+
+Install the pinned dependencies from the repository root and rebuild after
+editing `index.html`, `explorer.js`, or `styles.css`:
+
+```sh
+npm ci
+npm run build:css
+```
+
+Use `npm run watch:css` while editing. Commit the source, `package.json`,
+`package-lock.json`, and generated `explorer.css` together. Pages serves that
+stylesheet directly and needs no Node.js runtime. The CSS source only scans
+the explorer HTML and JavaScript, keeping raw data outside the style build.
 
 ## Add a city
 

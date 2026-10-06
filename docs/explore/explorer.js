@@ -78,7 +78,7 @@
       $("palette").replaceChildren(...Object.keys(manifest.palettes).map(p=>option(p,p.charAt(0).toUpperCase()+p.slice(1))));
       $("palette").value=state.palette;
       $("modes").replaceChildren(...manifest.modes.map(mode=>{
-        const button=document.createElement("button");button.type="button";button.textContent=names[mode]||mode;button.dataset.mode=mode;
+        const button=document.createElement("button");button.type="button";button.className="btn pill";button.textContent=names[mode]||mode;button.dataset.mode=mode;
         button.setAttribute("aria-pressed",String(state.modes.has(mode)));
         button.addEventListener("click",()=>{state.modes.has(mode)?state.modes.delete(mode):state.modes.add(mode);button.setAttribute("aria-pressed",String(state.modes.has(mode)));drawBackground();render();saveUrl();});
         return button;
@@ -134,7 +134,7 @@
     b.fillStyle="#111e33";
     for(const polygon of state.geometry.water){const path=new Path2D();for(const ring of polygon){ring.forEach(([x,y],i)=>i?path.lineTo(x,y):path.moveTo(x,y));path.closePath();}b.fill(path,"evenodd");}
     // Opaque, dark context prevents stacked variants from becoming a static glow.
-    b.strokeStyle="#17202b";b.globalAlpha=1;b.lineWidth=state.matrix.ratio*.45/state.matrix.scale;
+    b.strokeStyle="#17202b";b.globalAlpha=1;b.lineWidth=state.matrix.ratio*.3/state.matrix.scale;
     for(const section of state.geometry.sections)if(state.modes.has(section.mode))b.stroke(state.paths[section.id].path);
     b.globalAlpha=1;
   }
@@ -151,7 +151,7 @@
       const {intensity,delta}=intensityModel.visual(count,section.peakDepartures,maximum,state.view,reference[section.id]);
       if(intensity<=0)continue;visible++;
       const color=state.view==="change"?(delta>0?"#b4eccd":"#e99090"):palette[section.mode];
-      ctx.globalAlpha=1;ctx.strokeStyle=intensityModel.color(color,intensity);ctx.lineWidth=(.45+2.7*intensity)*state.matrix.ratio/state.matrix.scale;
+      ctx.globalAlpha=1;ctx.strokeStyle=intensityModel.color(color,intensity);ctx.lineWidth=(.3+1.35*intensity)*state.matrix.ratio/state.matrix.scale;
       ctx.stroke(state.paths[section.id].path);
     }
     ctx.globalCompositeOperation="source-over";ctx.globalAlpha=1;ctx.setTransform(1,0,0,1,0,0);
@@ -159,7 +159,7 @@
     $("window").textContent=`${frame.label} — ${frame.endLabel}${frame.endDate!==$("date").value?" (+1 day)":""}${state.playing?" · blending":""}`;
     $("empty").textContent=state.view==="change"&&visible===0&&active>0?"No change from 08:00 for the selected modes.":"No scheduled service in this window for the selected modes.";
     $("empty").hidden=state.view==="change"?visible!==0:active!==0;
-    $("view-explanation").textContent=(state.view==="rhythm"?"Daily rhythm · frequent service near its weekly peak shines brighter; rare service stays subdued.":state.view==="change"?"Change from 08:00 · mint = more service; coral = less; pale overlaps = mixed changes. Unchanged sections remain faint.":"Departures · brighter = more departures. One logarithmic scale stays fixed across the week.")+" Playback blends 15-minute samples; paused counts are exact after the fade.";
+    $("view-explanation").textContent=(state.view==="rhythm"?"Daily rhythm · brightness reflects service relative to each section’s weekly peak, weighted by frequency.":state.view==="change"?"Change from 08:00 · mint = more service; coral = less; pale overlaps = mixed changes. Unchanged sections remain faint.":"Departures · brighter = more departures. One logarithmic scale stays fixed across the week.")+" Playback blends 15-minute samples; paused counts are exact after the fade.";
     $("palette").disabled=state.view==="change";
     canvas.setAttribute("aria-label",`${state.manifest.title}, ${$("date").value}, ${frame.label} to ${frame.endLabel}. ${active} sections have service. View: ${$("view").selectedOptions[0].textContent}.`);
     canvas.dataset.renderMs=(performance.now()-started).toFixed(2);

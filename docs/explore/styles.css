@@ -1,0 +1,92 @@
+@import "tailwindcss" source(none);
+@source "./index.html";
+@source "./explorer.js";
+
+@plugin "daisyui" {
+  themes: false;
+  include: button, select, range;
+  logs: false;
+}
+
+@plugin "daisyui/theme" {
+  name: "cityliner";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: #080b10;
+  --color-base-200: #10151d;
+  --color-base-300: #29313c;
+  --color-base-content: #f0eee8;
+  --color-primary: #dfebe4;
+  --color-primary-content: #101a16;
+  --color-secondary: #a5afbb;
+  --color-secondary-content: #080b10;
+  --color-accent: #b4eccd;
+  --color-accent-content: #101a16;
+  --color-neutral: #151d27;
+  --color-neutral-content: #f0eee8;
+  --color-info: #a7c9ef;
+  --color-info-content: #080b10;
+  --color-success: #b4eccd;
+  --color-success-content: #101a16;
+  --color-warning: #ebcd9b;
+  --color-warning-content: #080b10;
+  --color-error: #f7bbae;
+  --color-error-content: #080b10;
+  --radius-selector: 9999rem;
+  --radius-field: 9999rem;
+  --radius-box: .75rem;
+  --size-selector: .25rem;
+  --size-field: .25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --color-page: #080b10;
+  --color-panel: #10151d;
+  --color-control: #151d27;
+  --color-control-hover: #253140;
+  --color-ink: #f0eee8;
+  --color-muted: #a5afbb;
+  --color-edge: #29313c;
+  --color-accent: #b4eccd;
+  --color-selected: #dfebe4;
+  --color-selected-ink: #101a16;
+  --color-map: #080c13;
+  --color-detail: #0c1119;
+  --color-notice: #121c29;
+  --color-error: #f7bbae;
+  --color-error-edge: #ae685d;
+  --font-display: Georgia, serif;
+}
+
+@layer base {
+  :root { @apply scheme-dark; }
+  [hidden] { @apply hidden!; }
+  a { @apply hover:underline; }
+  :where(button, select, input, a, summary):focus-visible {
+    @apply outline-2 outline-offset-4 outline-accent;
+  }
+}
+
+@utility pill {
+  @apply h-11 min-h-11 rounded-full border-edge bg-control px-4 text-xs font-medium text-ink shadow-none transition-colors hover:bg-control-hover disabled:cursor-wait disabled:opacity-50 disabled:hover:bg-control aria-pressed:border-selected aria-pressed:bg-selected aria-pressed:text-selected-ink aria-pressed:hover:bg-accent motion-reduce:transition-none;
+}
+
+@utility field-select {
+  @apply h-11 min-h-11 max-w-full rounded-full border-edge bg-control pr-9 pl-4 text-base font-normal normal-case tracking-normal text-ink disabled:cursor-wait disabled:opacity-50 sm:text-sm;
+}
+
+@layer components {
+  .field-label {
+    @apply flex min-w-0 flex-col gap-1.5 text-[11px] tracking-[.08em] text-muted uppercase;
+  }
+  .eyebrow {
+    @apply mb-3 text-[11px] font-semibold tracking-[.17em] text-accent uppercase;
+  }
+  .map-notice {
+    @apply absolute right-5 bottom-6 left-5 rounded-xl bg-notice/90 p-3.5 text-center;
+  }
+}
