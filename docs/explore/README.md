@@ -3,11 +3,11 @@
 One exporter and one static Canvas viewer serve every city. The existing
 `main.py` poster command and its cache formats remain independent.
 
-The included bundles are **archives**, not current transit information:
-Berlin, September 4–10, 2023; Warsaw, January 1–7, 2024. The viewer displays
-their actual dates, feed coverage, and exclusions. Refresh the feeds before
-promoting an experience about current service. Nothing has been deployed by
-this implementation.
+The published schedules cover October 7–13, 2026, using feeds downloaded on
+October 6, 2026. The viewer displays their actual dates, feed coverage,
+download information, and exclusions. These are scheduled departures, not live
+transit information. See [SOURCES.md](SOURCES.md) for provenance and refresh
+instructions. Nothing has been deployed by this implementation.
 
 ## Run locally
 
@@ -35,22 +35,24 @@ for publishing the derived output. A city identifier must be a lowercase slug.
   --gtfs ./gtfs/berlin \
   --place-name berlin --title Berlin \
   --center 52.52493,13.36963 --max-dist 30 \
-  --week-start 2023-09-04 --color-scheme cool \
-  --attribution 'VBB GTFS archive, August 2023 · OpenStreetMap water' \
-  --water ./processed/berlin/30/water_bodies_osm.json \
+  --week-start 2026-10-07 --color-scheme cool \
+  --attribution 'Verkehrsverbund Berlin-Brandenburg (VBB), CC BY 4.0 · © OpenStreetMap contributors' \
+  --provenance ./gtfs/refresh-2026-10-06/berlin-provenance.json \
+  --water ./processed/explorer/refresh-2026-10-06/berlin-water.json \
   --output-dir ./processed/explorer/berlin
 
 .venv/bin/python -m citylines.explorer.export \
   --gtfs ./gtfs/warsaw \
   --place-name warsaw --title Warsaw \
   --center 52.228865,21.0006369 --max-dist 30 \
-  --week-start 2024-01-01 --color-scheme pastel \
-  --attribution 'Warsaw GTFS archive by Mikołaj Kuranowski, December 2023 · OpenStreetMap water' \
-  --water ./processed/warsaw/30/water_bodies_osm.json \
+  --week-start 2026-10-07 --color-scheme pastel \
+  --attribution 'Zarząd Transportu Miejskiego w Warszawie (ZTM / WTP) · © OpenStreetMap contributors' \
+  --provenance ./gtfs/refresh-2026-10-06/warsaw-provenance.json \
+  --water ./processed/explorer/refresh-2026-10-06/warsaw-water.json \
   --output-dir ./processed/explorer/warsaw
 ```
 
-These dates match the archived feeds in this checkout. For a refreshed feed,
+These dates match the refreshed feeds in this checkout. On the next refresh,
 choose a covered week instead. `--max-dist` is the half-width of a square map
 in kilometres, using a local metric projection. The camera stays fixed at
 those bounds. V1 limits radius to 250 km, latitude to below 80° absolute,
@@ -62,21 +64,23 @@ projection metadata. The exporter converts its poster coordinates back to
 geography and clips them. Alternatively supply an object with `center`,
 `bounds`, and `polygons` already in the export's metric projection; polygon
 rings contain `[x,y]` pairs. Missing or incompatible water is a diagnostic,
-not a failed export. No water download is performed.
+not a failed export. No water download is performed by the exporter. The
+separate water converter accepts a freshly downloaded Overpass response and
+preserves relation holes and disconnected outer rings.
 
 Stage only a reviewed derived bundle into the local viewer:
 
 ```sh
 .venv/bin/python -m citylines.explorer.publish \
-  --bundle ./processed/explorer/berlin/2cd5a9f33605d24c
+  --bundle ./processed/explorer/berlin/43965434c2633313
 .venv/bin/python -m citylines.explorer.publish \
-  --bundle ./processed/explorer/warsaw/1fa709baf934f8a4
+  --bundle ./processed/explorer/warsaw/4fc5c6e79f44681d
 ```
 
 Use the bundle path printed by your export. This command copies a whitelist of
 derived assets into `docs/explore/data` and updates `catalog.json`; it does
-**not** deploy the site. Old bundle versions are retained so saved links keep
-working. Raw feeds, SQLite caches, audit working files, and poster outputs stay
+**not** deploy the site. After release, retain published versions so shared
+links keep working. The unreleased archive demos are kept privately for this refresh. Raw feeds, SQLite caches, audit working files, and poster outputs stay
 under ignored directories. Source feed licenses still govern their derived use.
 
 ## Schedule and geometry rules
@@ -120,10 +124,12 @@ staging model for a future Transit Portrait feature.
 
 ## Bundle format and viewer
 
-`schemaVersion: 1`, processor `1.1.0`, frame encoding `sparse-deltas-v1`:
+`schemaVersion: 1`, processor `1.2.0`, frame encoding `sparse-deltas-v1`:
 
 - `manifest.json`: identity, fingerprint, timezone, dates, source, bounds,
   modes, palettes, warnings, and one intensity maximum for the entire week.
+  Feed credits are in `attributions`; `provenance` records the download URL,
+  retrieval time and license; `waterSource` records the OSM data timestamp.
 - `geometry.json.gz`: reusable section paths in metres, transport categories,
   route names, stop references, estimation flags, a fixed `peakDepartures` per
   section computed across every exported window, and optional water polygons.

@@ -21,6 +21,38 @@ def query_for(center, radius):
     return '[out:json][timeout:180];(' + ''.join(selectors) + ');out geom;'
 
 
+def build_shapefile_water(path, center, radius, retrieved_at, url, data_timestamp):
+    """Use a fresh regional extract when public Overpass services time out."""
+    import geopandas as gpd
+    from shapely.ops import transform
+
+    delta = radius * 1000 / R * 180 / math.pi
+    longitude = delta / math.cos(math.radians(center[0]))
+    geographic = (center[1]-longitude, center[0]-delta, center[1]+longitude, center[0]+delta)
+    frame = gpd.read_file(path, bbox=geographic)
+    if frame.crs is None or frame.crs.to_epsg() != 4326:
+        raise ValueError("Water shapefile must declare WGS84 / EPSG:4326")
+    polygons, diagnostics = [], Counter()
+    for polygon in frame.geometry:
+        if polygon is None or polygon.is_empty or not polygon.is_valid:
+            diagnostics["Invalid water polygon"] += 1
+            continue
+        projected = transform(lambda x, y, z=None: project(y, x, center), polygon)
+        clipped = projected.intersection(box(*bounds_for(radius))).simplify(12, preserve_topology=True)
+        pieces = [clipped] if clipped.geom_type == "Polygon" else getattr(clipped, "geoms", [])
+        for piece in pieces:
+            if piece.geom_type == "Polygon" and not piece.is_empty:
+                polygons.append([[[round(x, 1), round(y, 1)] for x, y in ring.coords]
+                                 for ring in [piece.exterior, *piece.interiors]])
+        diagnostics["processed_elements"] += 1
+    if not polygons:
+        raise ValueError(f"No usable regional water polygons: {dict(diagnostics)}")
+    return {"center": list(center), "bounds": bounds_for(radius), "polygons": polygons,
+            "source": {"name": "© OpenStreetMap contributors, extract by Geofabrik", "url": "https://www.openstreetmap.org/copyright",
+                       "license": "ODbL-1.0", "retrievedAt": retrieved_at,
+                       "dataTimestamp": data_timestamp, "endpoint": url}, "diagnostics": dict(diagnostics)}
+
+
 def build_water(data, center, radius, retrieved_at, endpoint):
     if data.get("remark"):
         raise ValueError("Overpass returned an incomplete result: " + data["remark"])
@@ -95,6 +127,8 @@ def main():
     parser.add_argument("--max-dist", type=float, default=30)
     parser.add_argument("--query-output", type=Path)
     parser.add_argument("--input", type=Path)
+    parser.add_argument("--shapefile", type=Path, help="Regional WGS84 water polygon shapefile instead of Overpass JSON")
+    parser.add_argument("--data-timestamp", help="Regional extract's published OSM timestamp")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--retrieved-at")
     parser.add_argument("--endpoint")
@@ -104,10 +138,17 @@ def main():
         parser.error("Use latitude,longitude and a radius of 0–250 km below 80° latitude")
     if args.query_output:
         args.query_output.write_text(query_for(center, args.max_dist))
-    if args.input:
+    if args.input or args.shapefile:
         if not args.output or not args.retrieved_at or not args.endpoint:
             parser.error("Water conversion requires --output, --retrieved-at and --endpoint")
-        layer = build_water(json.loads(args.input.read_text()), center, args.max_dist, args.retrieved_at, args.endpoint)
+        if args.input and args.shapefile:
+            parser.error("Use --input or --shapefile, not both")
+        if args.shapefile:
+            if not args.data_timestamp:
+                parser.error("Regional water requires --data-timestamp")
+            layer = build_shapefile_water(args.shapefile, center, args.max_dist, args.retrieved_at, args.endpoint, args.data_timestamp)
+        else:
+            layer = build_water(json.loads(args.input.read_text()), center, args.max_dist, args.retrieved_at, args.endpoint)
         write_json(args.output, layer)
         print(json.dumps({"polygons": len(layer["polygons"]), "diagnostics": layer["diagnostics"], "source": layer["source"]}))
 
