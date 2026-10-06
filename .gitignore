@@ -1,5 +1,7 @@
 posters/
 venv
+.venv/
+.cache/
 .idea/
 processed/
 oceans/
