@@ -86,7 +86,7 @@ def audit(folder, bundle):
         frames = []
         for f in data["frames"]:
             current.update(f["changes"])
-            if f["label"].startswith(("07:00", "08:00", "09:00", "23:00")):
+            if f["label"].startswith(("07:00", "07:05", "07:10", "08:00", "08:05", "08:10", "09:00", "23:00", "23:55")):
                 frames.append((f, current.copy()))
         for (mode, a, b), sections, route_ids in candidates:
             rid = next(iter(route_ids))

@@ -68,10 +68,11 @@ def test_calendar_exceptions_and_weekends():
 
 def test_dst_service_origin_and_day_lengths():
     tz = ZoneInfo("Europe/Berlin")
-    assert len(day_windows(date(2024, 3, 31), tz)) == 92
+    assert len(day_windows(date(2024, 3, 31), tz)) == 276
     autumn = day_windows(date(2024, 10, 27), tz)
-    assert len(autumn) == 100
+    assert len(autumn) == 300
     assert {f["label"] for f in autumn if f["label"].startswith("02:00")} == {"02:00 CEST", "02:00 CET"}
+    assert {f["label"] for f in autumn if f["label"].startswith("02:05")} == {"02:05 CEST", "02:05 CET"}
     assert service_origin(date(2024, 3, 31), tz) == day_windows(date(2024, 3, 31), tz)[0]["start"] - 3600
     assert seconds("25:35:00") == 92100
     with pytest.raises(ValueError):
@@ -80,14 +81,14 @@ def test_dst_service_origin_and_day_lengths():
 
 def test_window_boundaries_and_frequencies():
     values = [0.] * 5
-    starts = [0, 900, 1800, 2700, 3600]
+    starts = [0, 300, 600, 900, 3600]
     add_departure(values, starts, 3600)
     assert values == [0, 1, 1, 1, 1]  # End exclusive; start inclusive.
     exact, estimated = [0.] * 5, [0.] * 5
     add_frequency(exact, starts, 0, 0, 0, 3600, 600, 1)
     add_frequency(estimated, starts, 0, 0, 0, 3600, 600, 0)
     assert exact[0] == estimated[0] == 6
-    assert exact[1] == 4 and estimated[1] == 4.5
+    assert exact[1] == 5 and estimated[1] == 5.5
     assert exact[4] == estimated[4] == 0
 
 
@@ -119,12 +120,24 @@ def test_full_export_local_timing_overnight_and_frequency(feed, tmp_path):
     second = next(s["id"] for s in geometry["sections"] if s["mode"] == "bus" and s["fromStop"] == "b")
     frequency = next(s["id"] for s in geometry["sections"] if s["mode"] == "subway" and s["fromStop"] == "a")
     frames = inflate(bundle, "2024-01-01")
+    assert len(frames) == 288
+    assert frames[-1][0]["label"].startswith("23:55")
+    assert all(b[0]["start"] - a[0]["start"] == 300 for a, b in zip(frames, frames[1:]))
+    assert all(f["end"] - f["start"] == 3600 for f, _ in frames)
+    assert manifest["stepSeconds"] == 300 and manifest["windowSeconds"] == 3600
     at8 = next(v for f, v in frames if f["label"].startswith("08:00"))
     at9 = next(v for f, v in frames if f["label"].startswith("09:00"))
     at7 = next(v for f, v in frames if f["label"].startswith("07:00"))
     assert at8[first] == 1 and at8.get(second, 0) == 0
     assert at9[second] == 1 and at9.get(first, 0) == 0
     assert at7[frequency] == 6 and at8.get(frequency, 0) == 0
+    at705 = next(v for f, v in frames if f["label"].startswith("07:05"))
+    at805 = next(v for f, v in frames if f["label"].startswith("08:05"))
+    at820 = next(v for f, v in frames if f["label"].startswith("08:20"))
+    at825 = next(v for f, v in frames if f["label"].startswith("08:25"))
+    assert at705[frequency] == 5.5
+    assert at805.get(first, 0) == 0
+    assert at820.get(second, 0) == 0 and at825[second] == 1
     at1 = next(v for f, v in inflate(bundle, "2024-01-02") if f["label"].startswith("01:00"))
     assert at1[first] == 1
     assert len(manifest["dates"]) == 7 and manifest["intensityMaximum"] == 6
