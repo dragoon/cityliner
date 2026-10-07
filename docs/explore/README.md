@@ -94,15 +94,18 @@ Stage only a reviewed derived bundle into the local viewer:
 
 ```sh
 .venv/bin/python -m citylines.explorer.publish \
-  --bundle ./processed/explorer/berlin/43965434c2633313
+  --bundle ./processed/explorer/berlin/6f809a0453819f42
 .venv/bin/python -m citylines.explorer.publish \
-  --bundle ./processed/explorer/warsaw/4fc5c6e79f44681d
+  --bundle ./processed/explorer/warsaw/f1abb2d65d33e1ec
 ```
 
 Use the bundle path printed by your export. This command copies a whitelist of
 derived assets into `docs/explore/data` and updates `catalog.json`; it does
-**not** deploy the site. After release, retain published versions so shared
-links keep working. Raw feeds, SQLite caches, audit working files, and poster outputs stay
+**not** deploy the site. The gallery currently keeps one active bundle per city.
+Superseded bundles can be archived under ignored `processed/` directories. Links
+to unavailable versions open the current bundle with a visible notice; retain a
+published version if exact reproduction of its original view is required.
+Raw feeds, SQLite caches, audit working files, and poster outputs stay
 under ignored directories. Source feed licenses still govern their derived use.
 
 ## Schedule and geometry rules
@@ -114,9 +117,11 @@ midnight include the needed following dates. The
 [GTFS schedule reference](https://gtfs.org/documentation/schedule/reference/)
 defines these service times and frequency rules.
 
-Each window covers 60 elapsed minutes, sampled every 15 elapsed minutes. A
-normal date has 96 frames; a typical spring/fall DST date has 92/100. Timestamps
+Each window covers 60 elapsed minutes, sampled every 5 elapsed minutes. A
+normal date has 288 frames; a typical spring/fall DST date has 276/300. Timestamps
 are absolute Unix seconds; repeated clock times carry timezone abbreviations.
+The viewer describes the loaded bundle's sampling interval, including any
+older bundles explicitly retained in the gallery.
 Exact frequency rules expand to departures. Other frequency rules contribute
 the overlap duration divided by headway, shifted by each stop's timetable
 offset. The template trip is never counted separately.
@@ -178,7 +183,7 @@ shape variants cannot accumulate a misleading glow. All five palettes remain
 available. A blank service view explicitly reports zero service.
 
 Opening without a saved view starts paused at 08:00 on the first date. Playback
-loops the selected date in about 30 seconds, blending adjacent 15-minute
+loops the selected date in about 30 seconds, blending adjacent 5-minute
 counts continuously on animation frames, including the visual loop seam.
 Blended display values are marked as approximate; they are not new timetable
 measurements. Dragging or using the keyboard on the slider pauses playback
@@ -244,5 +249,5 @@ source URL. The water polygon file must declare EPSG:4326. Source timestamps
 should come from the downloaded response or extract metadata.
 
 Validate the replacement bundle before updating the catalog. Keep raw feeds,
-water responses, and processing caches outside the published site. Retain
-previously published bundle versions for shared links.
+water responses, and processing caches outside the published site. Archive
+superseded bundles privately unless their original views need to stay available.

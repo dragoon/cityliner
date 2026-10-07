@@ -159,7 +159,7 @@
     $("window").textContent=`${frame.label} — ${frame.endLabel}${frame.endDate!==$("date").value?" (+1 day)":""}${state.playing?" · blending":""}`;
     $("empty").textContent=state.view==="change"&&visible===0&&active>0?"No change from 08:00 for the selected modes.":"No scheduled service in this window for the selected modes.";
     $("empty").hidden=state.view==="change"?visible!==0:active!==0;
-    $("view-explanation").textContent=(state.view==="rhythm"?"Daily rhythm · brightness reflects service relative to each section’s weekly peak, weighted by frequency.":state.view==="change"?"Change from 08:00 · mint = more service; coral = less; pale overlaps = mixed changes. Unchanged sections remain faint.":"Departures · brighter = more departures. One logarithmic scale stays fixed across the week.")+" Playback blends 15-minute samples; paused counts are exact after the fade.";
+    $("view-explanation").textContent=(state.view==="rhythm"?"Daily rhythm · brightness reflects service relative to each section’s weekly peak, weighted by frequency.":state.view==="change"?"Change from 08:00 · mint = more service; coral = less; pale overlaps = mixed changes. Unchanged sections remain faint.":"Departures · brighter = more departures. One logarithmic scale stays fixed across the week.")+` Playback blends ${state.manifest.stepSeconds/60}-minute samples; paused counts are exact after the fade.`;
     $("palette").disabled=state.view==="change";
     canvas.setAttribute("aria-label",`${state.manifest.title}, ${$("date").value}, ${frame.label} to ${frame.endLabel}. ${active} sections have service. View: ${$("view").selectedOptions[0].textContent}.`);
     canvas.dataset.renderMs=(performance.now()-started).toFixed(2);
@@ -187,6 +187,7 @@
   }
   function tick(now){
     if(!state.playing)return;
+    // Keep the whole-day loop at 30 seconds regardless of sample count or DST.
     const duration=30000/state.frames.length;
     const position=(playStart+(now-playEpoch)/duration)%state.frames.length,index=Math.floor(position),changed=index!==state.index;
     state.index=index;

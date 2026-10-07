@@ -20,7 +20,7 @@ import numpy as np
 from citylines.util.colors import color_schemes
 from . import VERSION, STAGING_VERSION
 from .geometry import bounds_for, clipped_paths, interpolate_times, match_stops, project, shape_model
-from .schedule import active_services, add_departure, add_frequency, day_windows, seconds, service_origin
+from .schedule import STEP, WINDOW, active_services, add_departure, add_frequency, day_windows, seconds, service_origin
 from .source import Feed, coordinate, stage
 
 
@@ -64,7 +64,7 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
                     "radius": radius, "week": week_start.isoformat(), "palette": palette,
                     "place": place_name, "title": title, "attribution": attribution,
                     "water": hashlib.sha256(Path(water).read_bytes()).hexdigest() if water and Path(water).is_file() else None,
-                    "provenance": provenance}
+                    "provenance": provenance, "windowSeconds": WINDOW, "stepSeconds": STEP}
         bundle_id = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:16]
         db = stage(feed, Path(cache_dir) / f"{STAGING_VERSION}-{fingerprint}.sqlite")
         agencies = list(feed.rows("agency.txt", ("agency_timezone",)))
@@ -290,8 +290,8 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
                     "source": attribution or "; ".join(a.get("agency_name", "") for a in agencies),
                     "attributions": credits, "provenance": provenance, "waterSource": water_source,
                     "dates": date_files, "geometry": "geometry.json.gz", "modes": sorted({s["mode"] for s in sections}),
-                    "palette": palette, "palettes": palette_data, "windowSeconds": 3600,
-                    "stepSeconds": 900, "intensityMaximum": maximum, "warnings": warnings,
+                    "palette": palette, "palettes": palette_data, "windowSeconds": WINDOW,
+                    "stepSeconds": STEP, "intensityMaximum": maximum, "warnings": warnings,
                     "metric": "Departures from each section's upstream stop in the next hour",
                     "frameEncoding": "sparse-deltas-v1"}
         write_json(bundle / "manifest.json", manifest)

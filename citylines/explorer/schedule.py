@@ -4,7 +4,7 @@ from bisect import bisect_right
 from zoneinfo import ZoneInfo
 
 UTC = timezone.utc
-STEP = 900
+STEP = 300
 WINDOW = 3600
 
 

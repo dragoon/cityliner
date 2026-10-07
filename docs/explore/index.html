@@ -7,7 +7,7 @@
   <title>Cityliner — GTFS time explorer</title>
   <link rel="stylesheet" href="explorer.css?v=1.4.0">
   <script defer src="intensity.js?v=1.3.0"></script>
-  <script defer src="explorer.js?v=1.4.0"></script>
+  <script defer src="explorer.js?v=1.4.1"></script>
 </head>
 <body class="bg-page font-sans text-[15px] leading-[1.55] text-ink">
   <header class="mx-auto flex max-w-[1320px] items-center justify-between gap-4 border-b border-edge px-[18px] py-[17px] sm:px-7 sm:py-[23px]">
@@ -35,8 +35,8 @@
         <button id="play" class="btn btn-primary h-11 min-h-11 min-w-[82px] rounded-full px-3 text-xs font-semibold shadow-none hover:bg-accent sm:min-w-[104px] sm:px-4" disabled aria-label="Play the selected day">Play day</button>
         <div class="min-w-0 flex-1">
           <div class="flex flex-col items-start gap-1 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:gap-3"><label class="text-[10px] sm:text-xs" for="time">Scheduled service · next hour</label><output class="text-[15px] text-ink tabular-nums sm:text-[17px]" id="window" aria-live="polite">—</output></div>
-          <div class="mt-[3px] flex min-h-11 items-center"><input class="range range-primary range-xs w-full" id="time" type="range" min="0" max="95" value="32" step="1" disabled aria-label="Start time of the service window"></div>
-          <div class="flex justify-between text-[10px] text-muted" aria-hidden="true"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span id="day-end">23:45</span></div>
+          <div class="mt-[3px] flex min-h-11 items-center"><input class="range range-primary range-xs w-full" id="time" type="range" min="0" max="287" value="96" step="1" disabled aria-label="Start time of the service window"></div>
+          <div class="flex justify-between text-[10px] text-muted" aria-hidden="true"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span id="day-end">23:55</span></div>
         </div>
       </div>
       <div class="flex flex-col items-start gap-4 px-3.5 pb-4 sm:flex-row sm:items-end sm:justify-between sm:px-[22px] sm:pb-5"><div id="modes" class="flex flex-wrap gap-2" aria-label="Transport modes"></div><div class="flex flex-wrap items-end gap-3 sm:gap-4"><label class="field-label" for="view">View<select class="select field-select" id="view" disabled><option value="rhythm">Daily rhythm</option><option value="change">Change from 08:00</option><option value="departures">Departures</option></select></label><label class="field-label" for="palette">Palette<select class="select field-select" id="palette" disabled></select></label></div></div>
