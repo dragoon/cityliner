@@ -1,5 +1,5 @@
 """Offline GTFS schedule exports for Cityliner's static time explorer."""
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 # The raw SQLite layout is unchanged by new derived visualization metrics.
 STAGING_VERSION = "1.0.0"
