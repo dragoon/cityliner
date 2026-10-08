@@ -6,7 +6,7 @@
   const background = document.createElement("canvas");
   const intensityModel = window.CitylinerIntensity;
   const names = {tram:"Tram",subway:"Metro",rail:"Rail",bus:"Bus",ferry_water:"Ferry",funicular_cable_gondola:"Cable",other:"Other"};
-  const state = {catalog:[],manifest:null,geometry:null,frames:[],values:[],display:null,transition:false,index:0,referenceIndex:0,view:"rhythm",modes:new Set(),palette:"default",playing:false,generation:0,paths:[],matrix:null,dayCache:new Map()};
+  const state = {catalog:[],manifest:null,geometry:null,frames:[],values:[],display:null,transition:false,index:0,referenceIndex:0,view:"rhythm",modes:new Set(),palette:"default",playing:false,generation:0,paths:[],matrix:null,dayCache:new Map(),retry:null};
   let animation = 0, playEpoch = 0, playStart = 0, playFrom = null, hoverFrame = 0, artworkUrl = null;
   const initial = new URLSearchParams(location.hash.slice(1));
 
@@ -39,6 +39,7 @@
     return bundle && /^[a-f0-9]{16}$/.test(bundle) ? new URL(`../${bundle}/manifest.json`,latest).href : latest.href;
   }
   async function loadCity(params = new URLSearchParams()) {
+    state.retry=()=>loadCity(params);
     const token = ++state.generation;
     state.frames=[];state.values=[];state.display=null;
     state.detailId=null;$("section-detail").textContent="Hover or tap a line to see its routes and departures.";
@@ -92,6 +93,7 @@
     }catch(exc){if(token===state.generation)error(exc);}
   }
   async function loadDay(params=new URLSearchParams(), token=state.generation) {
+    state.retry=()=>loadDay(params,token);
     pause();busy(true);$("error").hidden=true;$("loading").textContent="Loading the selected day…";
     const day=$("date").value;
     try{
@@ -113,7 +115,7 @@
       if(params.has("time")){const found=state.frames.findIndex(f=>f.start===requested);if(found>=0)index=found;}
       state.index=Math.max(0,index);$("time").max=state.frames.length-1;$("day-end").textContent=state.frames.at(-1).label.slice(0,5);
       state.display=state.values[state.index].slice();
-      busy(false);render();saveUrl();
+      state.retry=null;busy(false);render();saveUrl();
     }catch(exc){if(token===state.generation)error(exc);}
   }
   function resize(){
@@ -122,39 +124,47 @@
     canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
     background.width=canvas.width;background.height=canvas.height;
     if(!state.manifest)return;
-    const [x0,y0,x1,y1]=state.manifest.bounds;
-    const scale=Math.min(canvas.width/(x1-x0),canvas.height/(y1-y0))*.94;
-    state.matrix={scale,x:canvas.width/2-(x0+x1)/2*scale,y:canvas.height/2-(y0+y1)/2*scale,ratio};
+    state.matrix=mapMatrix(canvas.width,canvas.height,ratio);
     drawBackground();render();
   }
-  function transform(context){const m=state.matrix;context.setTransform(m.scale,0,0,m.scale,m.x,m.y);}
-  function drawBackground(){
-    if(!state.matrix||!state.geometry)return;
-    const b=background.getContext("2d");b.setTransform(1,0,0,1,0,0);b.fillStyle="#080c13";b.fillRect(0,0,background.width,background.height);transform(b);
+  function mapMatrix(width,height,ratio){
+    const [x0,y0,x1,y1]=state.manifest.bounds;
+    const scale=Math.min(width/(x1-x0),height/(y1-y0))*.94;
+    return {scale,x:width/2-(x0+x1)/2*scale,y:height/2-(y0+y1)/2*scale,ratio};
+  }
+  function transform(context,matrix=state.matrix){context.setTransform(matrix.scale,0,0,matrix.scale,matrix.x,matrix.y);}
+  function drawBackground(target=background,matrix=state.matrix){
+    if(!matrix||!state.geometry)return;
+    const b=target.getContext("2d");b.setTransform(1,0,0,1,0,0);b.fillStyle="#080c13";b.fillRect(0,0,target.width,target.height);transform(b,matrix);
     b.fillStyle="#111e33";
     for(const polygon of state.geometry.water){const path=new Path2D();for(const ring of polygon){ring.forEach(([x,y],i)=>i?path.lineTo(x,y):path.moveTo(x,y));path.closePath();}b.fill(path,"evenodd");}
     // Opaque, dark context prevents stacked variants from becoming a static glow.
-    b.strokeStyle="#17202b";b.globalAlpha=1;b.lineWidth=state.matrix.ratio*.3/state.matrix.scale;
+    b.strokeStyle="#17202b";b.globalAlpha=1;b.lineWidth=matrix.ratio*.3/matrix.scale;
     for(const section of state.geometry.sections)if(state.modes.has(section.mode))b.stroke(state.paths[section.id].path);
     b.globalAlpha=1;
   }
-  function render(mix=0){
-    if(!state.matrix||!state.frames.length||!state.values[state.index]||!background.width||!background.height)return;
-    const started=performance.now();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(background,0,0);transform(ctx);
+  function drawService(context,matrix){
+    transform(context,matrix);
     const counts=state.display||state.values[state.index],palette=state.manifest.palettes[state.palette],maximum=state.manifest.intensityMaximum;
     const reference=state.values[state.referenceIndex];let active=0,visible=0;
     // Lighten opaque, intensity-colored strokes instead of adding their alpha.
     // Multiple overlapping shape variants cannot falsely brighten a corridor.
-    ctx.globalCompositeOperation="lighten";
+    context.globalCompositeOperation="lighten";
     for(const section of state.geometry.sections){const count=counts[section.id];if(!state.modes.has(section.mode))continue;
       if(count>0)active++;
       const {intensity,delta}=intensityModel.visual(count,section.peakDepartures,maximum,state.view,reference[section.id]);
       if(intensity<=0)continue;visible++;
       const color=state.view==="change"?(delta>0?"#b4eccd":"#e99090"):palette[section.mode];
-      ctx.globalAlpha=1;ctx.strokeStyle=intensityModel.color(color,intensity);ctx.lineWidth=(.3+1.35*intensity)*state.matrix.ratio/state.matrix.scale;
-      ctx.stroke(state.paths[section.id].path);
+      context.globalAlpha=1;context.strokeStyle=intensityModel.color(color,intensity);context.lineWidth=(.3+1.35*intensity)*matrix.ratio/matrix.scale;
+      context.stroke(state.paths[section.id].path);
     }
-    ctx.globalCompositeOperation="source-over";ctx.globalAlpha=1;ctx.setTransform(1,0,0,1,0,0);
+    context.globalCompositeOperation="source-over";context.globalAlpha=1;context.setTransform(1,0,0,1,0,0);
+    return {active,visible};
+  }
+  function render(mix=0){
+    if(!state.matrix||!state.frames.length||!state.values[state.index]||!background.width||!background.height)return;
+    const started=performance.now();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(background,0,0);
+    const {active,visible}=drawService(ctx,state.matrix);
     const frame=state.frames[state.index];$("time").value=state.index;
     $("window").textContent=`${frame.label} — ${frame.endLabel}${frame.endDate!==$("date").value?" (+1 day)":""}${state.playing?" · blending":""}`;
     $("empty").textContent=state.view==="change"&&visible===0&&active>0?"No change from 08:00 for the selected modes.":"No scheduled service in this window for the selected modes.";
@@ -232,24 +242,27 @@
   $("download").addEventListener("click",()=>{
     pause();state.display.set(state.values[state.index]);render();saveUrl();
     const filename=`cityliner-${state.manifest.city}-${$("date").value}.png`;
-    const out=document.createElement("canvas");out.width=canvas.width;const c=out.getContext("2d");
+    // Redraw geometry at a fixed artwork size rather than enlarging screen pixels.
+    const out=document.createElement("canvas"),mapSize=2400,ratio=3,margin=72,lineHeight=60;
+    out.width=mapSize;const c=out.getContext("2d");
     const paragraphs=[`Cityliner by Roman Prokofyev · ${$("date").value} · ${$("window").textContent}`,$("view-explanation").textContent,"Scheduled service; frequency-based services show expected departures.",state.manifest.source];
     for(const credit of state.manifest.attributions||[])paragraphs.push(`${credit.name}${credit.url?" · "+credit.url:""}`);
     if(state.manifest.provenance)paragraphs.push(`GTFS downloaded ${sourceTime(state.manifest.provenance.retrievedAt)} · ${state.manifest.provenance.license} · ${state.manifest.provenance.url}`);
     if(state.manifest.provenance?.licenseUrl)paragraphs.push(`Source data license / usage terms: ${state.manifest.provenance.licenseUrl}`);
     if(state.manifest.waterSource)paragraphs.push(`Water: ${state.manifest.waterSource.name} · ${state.manifest.waterSource.license} · data ${sourceTime(state.manifest.waterSource.dataTimestamp)} · ${state.manifest.waterSource.url}`);
-    const lines=[];c.font="14px sans-serif";
-    for(const text of paragraphs){let line="";for(const word of text.split(" ")){if(c.measureText(line+word).width>out.width-48){lines.push(line);line="";}line+=word+" ";}lines.push(line);}
-    out.height=canvas.height+50+lines.length*20;c.fillStyle="#080c13";c.fillRect(0,0,out.width,out.height);c.drawImage(canvas,0,0);
-    c.fillStyle="#f0eee8";c.font="32px Georgia";c.fillText(state.manifest.title,24,44);
-    c.fillStyle="#a5afbb";c.font="14px sans-serif";
-    lines.forEach((line,i)=>c.fillText(line,24,canvas.height+30+i*20));
+    const lines=[];c.font="42px sans-serif";
+    for(const text of paragraphs){let line="";for(const word of text.split(" ")){if(line&&c.measureText(line+word).width>out.width-margin*2){lines.push(line);line="";}line+=word+" ";}lines.push(line);}
+    out.height=mapSize+150+lines.length*lineHeight;
+    const matrix=mapMatrix(mapSize,mapSize,ratio);drawBackground(out,matrix);drawService(c,matrix);
+    c.fillStyle="#f0eee8";c.font="96px Georgia";c.fillText(state.manifest.title,margin,132);
+    c.fillStyle="#a5afbb";c.font="42px sans-serif";
+    lines.forEach((line,i)=>c.fillText(line,margin,mapSize+90+i*lineHeight));
     out.toBlob(blob=>{if(!blob){notice("Could not create the artwork. Please try again.");return;}if(artworkUrl)URL.revokeObjectURL(artworkUrl);artworkUrl=URL.createObjectURL(blob);const a=$("artwork-link");a.href=artworkUrl;a.download=filename;a.hidden=false;a.click();notice("Artwork ready with source and date information. Use Download PNG if your download did not start.");});
   });
-  $("retry").addEventListener("click",()=>state.catalog.length?loadCity(new URLSearchParams(location.hash.slice(1))):start());
+  $("retry").addEventListener("click",()=>state.retry?.());
   window.addEventListener("hashchange",()=>{const p=new URLSearchParams(location.hash.slice(1));if(state.catalog.some(c=>c.city===p.get("city")))$("city").value=p.get("city");loadCity(p);});
   new ResizeObserver(resize).observe(canvas);
   document.addEventListener("visibilitychange",()=>{if(document.hidden){pause();if(state.display&&state.values[state.index]){state.display.set(state.values[state.index]);render();}}});
-  async function start(){try{busy(true);const catalog=await read("catalog.json");state.catalog=catalog.cities;if(!state.catalog.length)throw new Error("No city bundles have been published yet.");$("city").replaceChildren(...state.catalog.map(c=>option(c.city,c.title)));if(state.catalog.some(c=>c.city===initial.get("city")))$("city").value=initial.get("city");$("city").disabled=false;await loadCity(initial);}catch(exc){error(exc);}}
+  async function start(){try{state.retry=start;busy(true);const catalog=await read("catalog.json");state.catalog=catalog.cities;if(!state.catalog.length)throw new Error("No city bundles have been published yet.");$("city").replaceChildren(...state.catalog.map(c=>option(c.city,c.title)));if(state.catalog.some(c=>c.city===initial.get("city")))$("city").value=initial.get("city");$("city").disabled=false;await loadCity(initial);}catch(exc){error(exc);}}
   start();
 })();
