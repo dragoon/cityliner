@@ -22,7 +22,8 @@ bus, ferry, and cable routes fit together.
 
 This repository contains the open-source Cityliner engine. It does not include raw GTFS feeds,
 private processing caches, print masters, customer files, or commercial workflow.
-Selected derived schedule archives and their attribution are included under `docs/explore/data`.
+The reusable browser viewer includes a small synthetic demo under `docs/explore/data`.
+Production branding, curated city datasets, analytics and deployment are maintained separately.
 
 The code is GPLv3. Gallery images are Creative Commons Attribution 4.0 unless noted otherwise.
 GTFS feeds, map data, city/agency logos, and transit brand marks can have their own licenses and
@@ -48,7 +49,7 @@ permission to use the relevant marks.
 - Multiple color schemes: default, pastel, inferno, earthy, cool.
 - Water body visualization (beta).
 - Administrative borders (beta).
-- Static Time Explorer: local stop-to-stop timing, a 15-minute slider, playback,
+- Static Time Explorer: local stop-to-stop timing, a five-minute slider, playback,
   mode filters, shareable views, and credited PNG downloads. See the
   [export guide](docs/explore/README.md), [data sources](docs/explore/SOURCES.md),
   and [testing guide](docs/explore/TESTING.md).

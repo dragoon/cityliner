@@ -1,10 +1,10 @@
 {
-  "name": "cityliner-site",
+  "name": "cityliner-viewer",
   "private": true,
   "scripts": {
     "build:css": "tailwindcss -i docs/explore/styles.css -o docs/explore/explorer.css --minify",
     "watch:css": "tailwindcss -i docs/explore/styles.css -o docs/explore/explorer.css --watch",
-    "test": "node --test tests/explorer_intensity.test.cjs"
+    "test": "node --test tests/explorer_*.test.cjs"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
