@@ -1,1 +1,1 @@
-{"schemaVersion":1,"cities":[{"city":"berlin","title":"Berlin","manifest":"data/berlin/6f809a0453819f42/manifest.json"},{"city":"warsaw","title":"Warsaw","manifest":"data/warsaw/f1abb2d65d33e1ec/manifest.json"}]}
+{"schemaVersion":1,"cities":[{"city":"demo","title":"Synthetic network","manifest":"data/demo/fd90d7802c555c38/manifest.json"}]}

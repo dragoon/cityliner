@@ -8,14 +8,16 @@ in [README.md](README.md):
 npm ci
 npm run build:css
 node --check docs/explore/explorer.js
-node --test tests/explorer_intensity.test.cjs
+node --check docs/explore/integration.js
+npm test
 git diff --check
 ```
 
 The fixtures cover calendars and exceptions, overnight service, frequency
 rules, daylight-saving changes, local timing along routes, missing stop times,
 loops, geometry clipping, water polygon holes, source attribution, and poster
-compatibility. JavaScript tests cover intensity scaling and animation blending.
+compatibility. JavaScript tests cover intensity scaling, animation blending,
+optional host callbacks, callback failure isolation, and share-link overrides.
 
 ## Compare a bundle with its source
 
@@ -41,3 +43,10 @@ Check city and date changes, keyboard and touch scrubbing, playback, mode
 filters, share-link restoration, and artwork downloads. Confirm source credits
 and dates appear in the viewer and exported PNG, including on narrow screens.
 Check that unavailable assets produce a visible error and retry control.
+
+## Check host integrations
+
+The standalone viewer must issue no analytics requests. See
+[INTEGRATION.md](INTEGRATION.md) for callbacks a host can implement. Check
+that the viewer still loads, shares, and exports if host callbacks throw.
+Production analytics tests belong in the host website repository.

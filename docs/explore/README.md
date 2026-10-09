@@ -28,7 +28,7 @@ The browser must support Canvas, Path2D, and gzip `DecompressionStream`.
 
 The explorer uses Tailwind CSS 4 for layout and daisyUI 5 for buttons, selects,
 and the time slider. Its `cityliner` theme preserves the dark palette and uses
-pill-shaped controls. All CSS is compiled locally; the deployed page loads no
+pill-shaped controls. All viewer CSS is compiled locally; the demo loads no
 styling library from a CDN.
 
 Install the pinned dependencies from the repository root and rebuild after
@@ -94,14 +94,13 @@ Stage only a reviewed derived bundle into the local viewer:
 
 ```sh
 .venv/bin/python -m citylines.explorer.publish \
-  --bundle ./processed/explorer/berlin/6f809a0453819f42
-.venv/bin/python -m citylines.explorer.publish \
-  --bundle ./processed/explorer/warsaw/f1abb2d65d33e1ec
+  --bundle ./processed/explorer/YOUR_CITY/BUNDLE_ID
 ```
 
 Use the bundle path printed by your export. This command copies a whitelist of
 derived assets into `docs/explore/data` and updates `catalog.json`; it does
-**not** deploy the site. The gallery currently keeps one active bundle per city.
+**not** deploy the site. The public demo contains a fictional network.
+Production galleries choose their own cities and bundle retention policy.
 Superseded bundles can be archived under ignored `processed/` directories. Links
 to unavailable versions open the current bundle with a visible notice; retain a
 published version if exact reproduction of its original view is required.
@@ -251,3 +250,16 @@ should come from the downloaded response or extract metadata.
 Validate the replacement bundle before updating the catalog. Keep raw feeds,
 water responses, and processing caches outside the published site. Archive
 superseded bundles privately unless their original views need to stay available.
+
+## Website integration
+
+This repository contains a reusable viewer and a small synthetic demo.
+Production branding, city catalogs, analytics, and deployment are maintained
+separately. See [INTEGRATION.md](INTEGRATION.md) for optional host callbacks.
+No analytics script loads in the standalone viewer.
+
+Regenerate the demo without downloading a feed:
+
+```sh
+.venv/bin/python -m scripts.build_explorer_demo
+```

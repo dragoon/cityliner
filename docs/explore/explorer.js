@@ -5,27 +5,34 @@
   const canvas = $("map"), ctx = canvas.getContext("2d");
   const background = document.createElement("canvas");
   const intensityModel = window.CitylinerIntensity;
+  const hooks = window.CitylinerIntegration.createHooks(window.citylinerHooks);
   const names = {tram:"Tram",subway:"Metro",rail:"Rail",bus:"Bus",ferry_water:"Ferry",funicular_cable_gondola:"Cable",other:"Other"};
   const state = {catalog:[],manifest:null,geometry:null,frames:[],values:[],display:null,transition:false,index:0,referenceIndex:0,view:"rhythm",modes:new Set(),palette:"default",playing:false,generation:0,paths:[],matrix:null,dayCache:new Map(),retry:null};
   let animation = 0, playEpoch = 0, playStart = 0, playFrom = null, hoverFrame = 0, artworkUrl = null;
   const initial = new URLSearchParams(location.hash.slice(1));
+  let pendingReadiness = false;
+  function viewContext() { return {city:state.manifest?.city,bundle:state.manifest?.bundle,view:state.view}; }
 
-  async function read(url) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Could not load ${new URL(url,location.href).pathname} (${response.status})`);
-    if (url.endsWith(".gz")) {
-      if (!window.DecompressionStream) throw new Error("This viewer needs a browser supporting gzip DecompressionStream. Please use a recent browser.");
-      return JSON.parse(await new Response(response.body.pipeThrough(new DecompressionStream("gzip"))).text());
-    }
-    return response.json();
+  async function read(url, stage) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Could not load ${new URL(url,location.href).pathname} (${response.status})`);
+      if (url.endsWith(".gz")) {
+        if (!window.DecompressionStream) throw new Error("This viewer needs a browser supporting gzip DecompressionStream. Please use a recent browser.");
+        return JSON.parse(await new Response(response.body.pipeThrough(new DecompressionStream("gzip"))).text());
+      }
+      return await response.json();
+    } catch (exc) { exc.stage = stage; throw exc; }
   }
   function notice(message) { $("action-status").textContent = message; }
   function busy(value) {
+    if (value) { pendingReadiness = false; hooks.loading(); }
     $("loading").hidden = !value;
     for (const id of ["time","play","share","download","palette","date","view"]) $(id).disabled = value;
     $("modes").querySelectorAll("button").forEach(b=>b.disabled=value);
   }
   function error(exc) {
+    hooks.loading(); hooks.event("loadFailed",{stage:exc.stage||"catalog"});
     pause(); busy(false); $("loading").hidden=true; $("error").hidden=false;
     $("error-message").textContent = exc.message || String(exc);
     for (const id of ["time","play","share","download"]) $(id).disabled=true;
@@ -48,14 +55,14 @@
     if (!entry) throw new Error("No published city selected");
     try {
       let url=versionUrl(entry,params), manifest;
-      try { manifest=await read(url); } catch(exc) {
+      try { manifest=await read(url,"manifest"); } catch(exc) {
         if (!params.has("bundle")) throw exc;
-        url=new URL(entry.manifest,location.href).href;manifest=await read(url);
+        url=new URL(entry.manifest,location.href).href;manifest=await read(url,"manifest");
         notice("That archive version is unavailable. Showing the published version.");
       }
-      if(manifest.schemaVersion!==1||manifest.frameEncoding!=="sparse-deltas-v1") throw new Error("Unsupported export bundle version");
+      if(manifest.schemaVersion!==1||manifest.frameEncoding!=="sparse-deltas-v1") throw Object.assign(new Error("Unsupported export bundle version"),{stage:"manifest"});
       const base=new URL(".",url).href;
-      const geometry=await read(new URL(manifest.geometry,base).href);
+      const geometry=await read(new URL(manifest.geometry,base).href,"geometry");
       if(token!==state.generation)return;
       state.manifest=manifest;state.geometry=geometry;state.base=base;state.dayCache.clear();
       state.palette=Object.hasOwn(manifest.palettes,params.get("palette"))?params.get("palette"):manifest.palette;
@@ -81,7 +88,7 @@
       $("modes").replaceChildren(...manifest.modes.map(mode=>{
         const button=document.createElement("button");button.type="button";button.className="btn pill";button.textContent=names[mode]||mode;button.dataset.mode=mode;
         button.setAttribute("aria-pressed",String(state.modes.has(mode)));
-        button.addEventListener("click",()=>{state.modes.has(mode)?state.modes.delete(mode):state.modes.add(mode);button.setAttribute("aria-pressed",String(state.modes.has(mode)));drawBackground();render();saveUrl();});
+        button.addEventListener("click",()=>{hooks.action();state.modes.has(mode)?state.modes.delete(mode):state.modes.add(mode);button.setAttribute("aria-pressed",String(state.modes.has(mode)));drawBackground();render();saveUrl();});
         return button;
       }));
       state.paths=geometry.sections.map(section=>{
@@ -90,7 +97,7 @@
         return {path,box:[Math.min(...flat.map(p=>p[0])),Math.min(...flat.map(p=>p[1])),Math.max(...flat.map(p=>p[0])),Math.max(...flat.map(p=>p[1]))]};
       });
       resize();await loadDay(params,token);
-    }catch(exc){if(token===state.generation)error(exc);}
+    }catch(exc){if(token===state.generation){exc.stage=exc.stage||"geometry";error(exc);}}
   }
   async function loadDay(params=new URLSearchParams(), token=state.generation) {
     state.retry=()=>loadDay(params,token);
@@ -100,7 +107,7 @@
       const key=state.manifest.bundle+day;
       if(!state.dayCache.has(key)){
         const entry=state.manifest.dates.find(d=>d.date===day);
-        const data=await read(new URL(entry.file,state.base).href);
+        const data=await read(new URL(entry.file,state.base).href,"day");
         if(token!==state.generation||day!==$("date").value)return;
         const current=new Float32Array(state.geometry.sections.length);
         const values=data.frames.map(frame=>{for(const [id,value]of frame.changes)current[id]=value;return current.slice();});
@@ -115,8 +122,8 @@
       if(params.has("time")){const found=state.frames.findIndex(f=>f.start===requested);if(found>=0)index=found;}
       state.index=Math.max(0,index);$("time").max=state.frames.length-1;$("day-end").textContent=state.frames.at(-1).label.slice(0,5);
       state.display=state.values[state.index].slice();
-      state.retry=null;busy(false);render();saveUrl();
-    }catch(exc){if(token===state.generation)error(exc);}
+      state.retry=null;busy(false);pendingReadiness=true;render();saveUrl();
+    }catch(exc){if(token===state.generation){exc.stage=exc.stage||"day";error(exc);}}
   }
   function resize(){
     const ratio=Math.min(devicePixelRatio||1,2),rect=canvas.getBoundingClientRect();
@@ -176,12 +183,13 @@
     canvas.dataset.interpolated=String(state.playing||state.transition);
     canvas.dataset.sampleMix=Number(mix).toFixed(4);
     showDetail();
+    if(pendingReadiness){pendingReadiness=false;hooks.ready(viewContext(),frame.start);}
   }
   function params(){
     return new URLSearchParams({city:state.manifest.city,bundle:state.manifest.bundle,date:$("date").value,time:state.frames[state.index].start,modes:[...state.modes].sort().join(","),palette:state.palette,view:state.view});
   }
   function saveUrl(){if(state.manifest&&state.frames.length)history.replaceState(null,"","#"+params());}
-  function pause(){state.playing=false;state.transition=false;cancelAnimationFrame(animation);$("play").textContent="Play day";$("play").setAttribute("aria-label","Play the selected day");$("window").setAttribute("aria-live","polite");$("section-detail").setAttribute("aria-live","polite");}
+  function pause(){hooks.playing(false);state.playing=false;state.transition=false;cancelAnimationFrame(animation);$("play").textContent="Play day";$("play").setAttribute("aria-label","Play the selected day");$("window").setAttribute("aria-live","polite");$("section-detail").setAttribute("aria-live","polite");}
   function settle(index){
     if(!state.values[index]||!state.display)return;
     const from=state.display.slice(),to=state.values[index],started=performance.now();
@@ -222,6 +230,7 @@
       }
     }
     state.detailId=best?best.id:null;showDetail();
+    if(best&&event.type==="click")hooks.action();
   }
   function showDetail(){
     const best=state.detailId==null?null:state.geometry.sections[state.detailId],counts=state.display||state.values[state.index];
@@ -230,15 +239,15 @@
     const comparison=state.view==="rhythm"?` · ${best.peakDepartures>0?Math.round(count/best.peakDepartures*100):0}% of its weekly peak`:state.view==="change"?` · ${delta>=0?"+":""}${Number(delta.toFixed(2))} vs 08:00`:"";
     $("section-detail").textContent=`${best.routes.map(r=>state.geometry.routes[r].name).join(" · ")} · ${names[best.mode]} · ${state.playing||state.transition?"≈ ":""}${Number(count.toFixed(2))} ${best.estimated?"scheduled / expected":"scheduled"} departures in this hour${comparison}${state.playing||state.transition?" · blended display":""}${best.interpolated?" · includes interpolated stop timing":""}`;
   }
-  $("city").addEventListener("change",()=>loadCity());
-  $("date").addEventListener("change",()=>loadDay());
-  $("time").addEventListener("input",()=>{pause();settle(Number($("time").value));});
+  $("city").addEventListener("change",()=>{hooks.action();loadCity();});
+  $("date").addEventListener("change",()=>{hooks.action();loadDay();});
+  $("time").addEventListener("input",()=>{pause();hooks.time(state.frames[Number($("time").value)]?.start);settle(Number($("time").value));});
   $("palette").addEventListener("change",()=>{state.palette=$("palette").value;render();saveUrl();});
-  $("view").addEventListener("change",()=>{state.view=$("view").value;render();saveUrl();});
-  $("play").addEventListener("click",()=>{if(state.playing){pause();settle(state.index);return;}pause();playFrom=state.display.slice();state.playing=true;playStart=state.index;playEpoch=performance.now();$("window").setAttribute("aria-live","off");$("section-detail").setAttribute("aria-live","off");$("play").textContent="Pause";$("play").setAttribute("aria-label","Pause playback");animation=requestAnimationFrame(tick);});
+  $("view").addEventListener("change",()=>{state.view=$("view").value;hooks.context(viewContext());hooks.action();render();saveUrl();});
+  $("play").addEventListener("click",()=>{if(state.playing){pause();settle(state.index);return;}pause();playFrom=state.display.slice();state.playing=true;hooks.playing(true);playStart=state.index;playEpoch=performance.now();$("window").setAttribute("aria-live","off");$("section-detail").setAttribute("aria-live","off");$("play").textContent="Pause";$("play").setAttribute("aria-label","Pause playback");animation=requestAnimationFrame(tick);});
   canvas.addEventListener("pointermove",event=>{cancelAnimationFrame(hoverFrame);hoverFrame=requestAnimationFrame(()=>detail(event));});
   canvas.addEventListener("click",detail);
-  $("share").addEventListener("click",async()=>{saveUrl();try{await navigator.clipboard.writeText(location.href);notice("View link copied.");}catch{notice("Copy the view link from your browser address bar.");}});
+  $("share").addEventListener("click",async()=>{saveUrl();const url=hooks.shareUrl(location.href);try{await navigator.clipboard.writeText(url);hooks.event("linkCopied");notice("View link copied.");}catch{history.replaceState(null,"",url);notice("Copy the view link from your browser address bar.");}});
   $("download").addEventListener("click",()=>{
     pause();state.display.set(state.values[state.index]);render();saveUrl();
     const filename=`cityliner-${state.manifest.city}-${$("date").value}.png`;
@@ -257,12 +266,12 @@
     c.fillStyle="#f0eee8";c.font="96px Georgia";c.fillText(state.manifest.title,margin,132);
     c.fillStyle="#a5afbb";c.font="42px sans-serif";
     lines.forEach((line,i)=>c.fillText(line,margin,mapSize+90+i*lineHeight));
-    out.toBlob(blob=>{if(!blob){notice("Could not create the artwork. Please try again.");return;}if(artworkUrl)URL.revokeObjectURL(artworkUrl);artworkUrl=URL.createObjectURL(blob);const a=$("artwork-link");a.href=artworkUrl;a.download=filename;a.hidden=false;a.click();notice("Artwork ready with source and date information. Use Download PNG if your download did not start.");});
+    out.toBlob(blob=>{if(!blob){notice("Could not create the artwork. Please try again.");return;}hooks.event("artworkReady");if(artworkUrl)URL.revokeObjectURL(artworkUrl);artworkUrl=URL.createObjectURL(blob);const a=$("artwork-link");a.href=artworkUrl;a.download=filename;a.hidden=false;a.click();notice("Artwork ready with source and date information. Use Download PNG if your download did not start.");});
   });
   $("retry").addEventListener("click",()=>state.retry?.());
   window.addEventListener("hashchange",()=>{const p=new URLSearchParams(location.hash.slice(1));if(state.catalog.some(c=>c.city===p.get("city")))$("city").value=p.get("city");loadCity(p);});
   new ResizeObserver(resize).observe(canvas);
   document.addEventListener("visibilitychange",()=>{if(document.hidden){pause();if(state.display&&state.values[state.index]){state.display.set(state.values[state.index]);render();}}});
-  async function start(){try{state.retry=start;busy(true);const catalog=await read("catalog.json");state.catalog=catalog.cities;if(!state.catalog.length)throw new Error("No city bundles have been published yet.");$("city").replaceChildren(...state.catalog.map(c=>option(c.city,c.title)));if(state.catalog.some(c=>c.city===initial.get("city")))$("city").value=initial.get("city");$("city").disabled=false;await loadCity(initial);}catch(exc){error(exc);}}
+  async function start(){try{state.retry=start;busy(true);const catalog=await read("catalog.json","catalog");state.catalog=catalog.cities;if(!state.catalog.length)throw new Error("No city bundles have been published yet.");$("city").replaceChildren(...state.catalog.map(c=>option(c.city,c.title)));if(state.catalog.some(c=>c.city===initial.get("city")))$("city").value=initial.get("city");$("city").disabled=false;await loadCity(initial);}catch(exc){error(exc);}}
   start();
 })();
