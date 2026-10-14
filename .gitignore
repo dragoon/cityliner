@@ -8,3 +8,7 @@ processed/
 oceans/
 __pycache__
 /gtfs/
+.pytest_cache/
+.DS_Store
+/docs/explore/data/
+/docs/explore/catalog.json

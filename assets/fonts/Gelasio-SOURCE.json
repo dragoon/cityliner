@@ -1,0 +1,21 @@
+{
+  "retrievedAt": "2026-10-14",
+  "license": "SIL OFL 1.1",
+  "files": [
+    {
+      "file": "assets/fonts/Gelasio-Regular.ttf",
+      "url": "https://raw.githubusercontent.com/SorkinType/Gelasio/main/fonts/ttf/Gelasio-Regular.ttf",
+      "sha256": "48c797fbe0e07c48a18cb962e7bdfa23f19618327dddf54093265328dc9eb39d"
+    },
+    {
+      "file": "docs/explore/fonts/Gelasio-Regular.woff2",
+      "url": "https://raw.githubusercontent.com/SorkinType/Gelasio/main/fonts/webfonts/Gelasio-Regular.woff2",
+      "sha256": "0bb67dec0df90ddcd5414a2c67766e3318db59662ab1097a1eaa007a88e3a61a"
+    },
+    {
+      "file": "assets/fonts/Gelasio-OFL.txt",
+      "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/gelasio/OFL.txt",
+      "sha256": "b393cb01867c919b44381512120dc3e4c954c7b47e2035c405f3a324799a4d29"
+    }
+  ]
+}

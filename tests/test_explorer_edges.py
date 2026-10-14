@@ -92,15 +92,19 @@ def test_missing_optional_water_does_not_block(feed, tmp_path):
     assert report["counts"]["water_cache_unavailable"] == 1
 
 
-def test_existing_poster_renderer(tmp_path):
+def test_existing_poster_renderer(tmp_path, monkeypatch):
     from citylines.generate_poster import Poster
     from citylines.gtfs.domain import RenderArea
     from citylines.util.colors import color_schemes
     (tmp_path / "data.lines").write_text("4\t3\t-100 -100,0 0,100 100\n")
     (tmp_path / "maxmin.lines").write_text("4\n1\n")
     output = tmp_path / "poster.pdf"
+    monkeypatch.delenv("CITYLINER_HEADING_FONT", raising=False)
+    monkeypatch.chdir(tmp_path)
     Poster(RenderArea(400, 600), output, tmp_path, "compatibility", "", []).generate_single(color_schemes["default"])
-    assert output.read_bytes().startswith(b"%PDF-") and output.stat().st_size > 1000
+    pdf = output.read_bytes()
+    assert pdf.startswith(b"%PDF-") and output.stat().st_size > 1000
+    assert b"Gelasio-Regular" in pdf
 
 
 def test_section_peaks_use_the_entire_week(feed, tmp_path):
@@ -112,3 +116,17 @@ def test_section_peaks_use_the_entire_week(feed, tmp_path):
             for sid, count in values.items():
                 maxima[sid] = max(maxima[sid], count)
     assert [s["peakDepartures"] for s in geometry["sections"]] == pytest.approx(maxima)
+
+
+def test_palette_changes_invalidate_bundle_without_changing_timetable(feed, tmp_path, monkeypatch):
+    from citylines.util.colors import color_schemes
+
+    first, _, first_bundle = export(feed, tmp_path)
+    # An alternative palette is also embedded in the bundle and must invalidate it.
+    monkeypatch.setattr(color_schemes["cool"], "bus", "#ABCDEF")
+    second, _, second_bundle = export(feed, tmp_path)
+    assert first["bundle"] != second["bundle"]
+    assert second["palettes"]["cool"]["bus"] == "#ABCDEF"
+    assert first["feedFingerprint"] == second["feedFingerprint"]
+    for name in [first["geometry"], *(day["file"] for day in first["dates"])]:
+        assert (first_bundle / name).read_bytes() == (second_bundle / name).read_bytes()

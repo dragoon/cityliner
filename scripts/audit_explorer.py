@@ -36,16 +36,28 @@ def audit(folder, bundle):
         pairs[(s["mode"], s["fromStop"], s["toStop"])].append(s)
     # Prefer frequency-based metro plus conventional sections; only unambiguous,
     # consistently attributed pairs are audited.
-    candidates = []
+    by_mode = defaultdict(list)
     ordered = sorted(pairs.items(), key=lambda item: not any(s["estimated"] for s in item[1]))
     for pair, sections in ordered:
         routes = {r for s in sections for r in s["routes"]}
         if len(routes) == 1 and not any(s["interpolated"] for s in sections):
-            candidates.append((pair, sections, routes))
+            by_mode[pair[0]].append((pair, sections, routes))
+    # Spread the sample across modes; shape ordering must not make the entire
+    # audit bus-only while rail, ferries or cable services go unchecked.
+    candidates = []
+    for index in range(max((len(rows) for rows in by_mode.values()), default=0)):
+        for mode in sorted(by_mode):
+            if index < len(by_mode[mode]):
+                candidates.append(by_mode[mode][index])
+            if len(candidates) >= 30:
+                break
         if len(candidates) >= 30:
             break
     route_ids = {r for _, _, ids in candidates for r in ids}
-    trips = {r["trip_id"]: r for r in read(folder, "trips.txt") if r["route_id"] in route_ids}
+    # Augmented feeds preserve unmatched schedules with blank shape IDs. They
+    # cannot contribute to a rendered section, even when the route is shared.
+    trips = {r["trip_id"]: r for r in read(folder, "trips.txt")
+             if r["route_id"] in route_ids and r.get("shape_id", "").strip()}
     stop_times = defaultdict(list)
     with (folder / "stop_times.txt").open(encoding="utf-8-sig", newline="") as f:
         for r in csv.DictReader(f):
@@ -108,6 +120,7 @@ def audit(folder, bundle):
                             expected += frame["start"] <= origin + dep < frame["end"]
                 actual = sum(exported.get(s["id"], 0) for s in sections)
                 sample_checks.append({"date": day_info["date"], "window": frame["label"], "route": rid,
+                                      "mode": mode,
                                       "from": a, "to": b, "expected": round(expected, 4), "exported": round(actual, 4),
                                       "estimated": any(s["estimated"] for s in sections)})
             if all(abs(c["expected"] - c["exported"]) < .001 for c in sample_checks) and any(c["expected"] for c in sample_checks):
@@ -119,6 +132,8 @@ def audit(folder, bundle):
     if len(checks) < 16:
         raise ValueError(f"Insufficient successful independent checks: {len(checks)}. Investigate {mismatches[:8]}")
     return {"city": manifest["city"], "passed": len(checks), "frequencyChecks": sum(c["estimated"] for c in checks),
+            "sampledModes": sorted({pair[0] for pair, _, _ in candidates}),
+            "checkedModes": sorted({c["mode"] for c in checks}),
             "candidateMismatches": sum(abs(c["expected"]-c["exported"]) >= .001 for c in mismatches), "checks": checks}
 
 

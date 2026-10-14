@@ -33,7 +33,7 @@ def publish(bundle, root):
 def main():
     parser = argparse.ArgumentParser(description="Add an exported bundle to the local static gallery; no deployment")
     parser.add_argument("--bundle", type=Path, required=True)
-    parser.add_argument("--gallery-root", type=Path, default=Path("docs/explore"))
+    parser.add_argument("--gallery-root", type=Path, default=Path("processed/explorer-demo"))
     args = parser.parse_args()
     try:
         print(publish(args.bundle, args.gallery_root))

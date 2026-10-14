@@ -2,7 +2,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from citylines.generate_poster import Poster
+from citylines.generate_poster import Poster, heading_font_path
 from citylines.gtfs.domain import RenderArea, Point, Distance
 from citylines.trip_extractor import process_gtfs_trips
 from citylines.util.colors import color_schemes
@@ -27,11 +27,18 @@ if __name__ == "__main__":
     parser.add_argument('--center', required=True, help='Coordinates of the center')
     parser.add_argument('--place-name', required=True, help='Name for the place')
     parser.add_argument('--logos', nargs='*', default=[],
-                        help='List of logos for the poster (inside ./assets/logos/{place_name}/)')
-    parser.add_argument('--color-scheme', choices=color_schemes.keys(), default='default',
+                        help='Optional marks you are entitled to use (inside ./assets/logos/{place_name}/)')
+    parser.add_argument('--color-scheme', choices=color_schemes.keys(), default='pastel',
                         help='Choose a color scheme for the poster. Allowed values are: %(choices)s')
+    parser.add_argument('--credit', action='append', default=[], help='Source/license credit line (repeatable)')
+    parser.add_argument('--heading-font', type=Path, help='Optional heading .ttf override; defaults to bundled Gelasio')
 
     args = parser.parse_args()
+
+    try:
+        args.heading_font = heading_font_path(args.heading_font)
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
 
     center_lat, center_lon = map(float, args.center.split(","))
     if args.poster:
@@ -51,7 +58,9 @@ if __name__ == "__main__":
     image_filepath = Path(f"./posters/{args.place_name}-{dist.km()}.pdf")
     p = Poster(render_area, out_path=image_filepath,
                input_dir=out_dir, city=args.place_name,
-               logos=[logo for logo in args.logos], text="")
+               logos=[logo for logo in args.logos],
+               text='\n'.join(args.credit + ['Cityliner by Roman Prokofyev | cityliner.app']),
+               heading_font=args.heading_font)
     p.generate_single(add_water=args.water, add_admin_borders=args.admin_borders,
                       color_scheme=color_schemes[args.color_scheme])
     logging.info(f"PDF generated at {image_filepath}")

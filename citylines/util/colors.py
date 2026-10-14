@@ -11,14 +11,14 @@ class ColorScheme:
     tram: str
 
 
-# Default Scheme
+# Ivory and graphite: a restrained, mostly neutral map.
 default_scheme = ColorScheme(
-    funicular_cable_gondola="#F761BF",
-    ferry_water="#FF8000",
-    bus="#E31B1C",
-    rail="#708A91",
-    subway="#4DAF4A",
-    tram="#1A75D1"
+    funicular_cable_gondola="#C9BBA7",
+    ferry_water="#9FB6C4",
+    bus="#E8E2D5",
+    rail="#909FA9",
+    subway="#BCCAC3",
+    tram="#BAC8D3"
 )
 
 # Pastel Scheme
@@ -31,38 +31,39 @@ pastel_scheme = ColorScheme(
     tram="#99CCFF"
 )
 
+# Apricot and rose: a warm map with distinct pink tram corridors.
 inferno_scheme = ColorScheme(
-    funicular_cable_gondola="#FF5733",  # Bright Orange
-    ferry_water="#C70039",  # Dark Red
-    bus="#FFC300",  # Bright Yellow
-    rail="#DAF7A6",  # Pale Green
-    subway="#581845",  # Dark Purple
-    tram="#900C3F"  # Dark Magenta
+    funicular_cable_gondola="#D3ABCB",
+    ferry_water="#DABDA0",
+    bus="#F1BD8E",
+    rail="#E2D3B6",
+    subway="#CBA8A0",
+    tram="#DA91AE"
 )
 
-# Earthy Scheme
+# Sea glass and moss: green carries the dominant bus network.
 earthy_scheme = ColorScheme(
-    funicular_cable_gondola="#E89005",
-    ferry_water="#55AA77",
-    bus="#B36500",
-    rail="#5D5D5D",
-    subway="#44BB44",
-    tram="#3377AA"
+    funicular_cable_gondola="#D8C7A1",
+    ferry_water="#82B9CB",
+    bus="#94D2BC",
+    rail="#CAD4D6",
+    subway="#79AEA1",
+    tram="#C0D59F"
 )
 
-# Cool Scheme
+# Lavender and ice blue: a cool map with violet bus corridors.
 cool_scheme = ColorScheme(
-    funicular_cable_gondola="#8E2DE2",
-    ferry_water="#2193B0",
-    bus="#C32BAD",
-    rail="#5D5DAA",
-    subway="#4DFFB3",
-    tram="#6761A8"
+    funicular_cable_gondola="#D4A0BE",
+    ferry_water="#A0CBD0",
+    bus="#BEA3E1",
+    rail="#DBCDDF",
+    subway="#ABBFD8",
+    tram="#8EBEDB"
 )
 
 color_schemes = {
-    'default': default_scheme,
     'pastel': pastel_scheme,
+    'default': default_scheme,
     'inferno': inferno_scheme,
     'earthy': earthy_scheme,
     'cool': cool_scheme

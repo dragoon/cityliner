@@ -248,7 +248,9 @@
   canvas.addEventListener("pointermove",event=>{cancelAnimationFrame(hoverFrame);hoverFrame=requestAnimationFrame(()=>detail(event));});
   canvas.addEventListener("click",detail);
   $("share").addEventListener("click",async()=>{saveUrl();const url=hooks.shareUrl(location.href);try{await navigator.clipboard.writeText(url);hooks.event("linkCopied");notice("View link copied.");}catch{history.replaceState(null,"",url);notice("Copy the view link from your browser address bar.");}});
-  $("download").addEventListener("click",()=>{
+  $("download").addEventListener("click",async()=>{
+    const titleFont = getComputedStyle($("city-title")).fontFamily;
+    await document.fonts.load(`96px ${titleFont}`);
     pause();state.display.set(state.values[state.index]);render();saveUrl();
     const filename=`cityliner-${state.manifest.city}-${$("date").value}.png`;
     // Redraw geometry at a fixed artwork size rather than enlarging screen pixels.
@@ -263,7 +265,7 @@
     for(const text of paragraphs){let line="";for(const word of text.split(" ")){if(line&&c.measureText(line+word).width>out.width-margin*2){lines.push(line);line="";}line+=word+" ";}lines.push(line);}
     out.height=mapSize+150+lines.length*lineHeight;
     const matrix=mapMatrix(mapSize,mapSize,ratio);drawBackground(out,matrix);drawService(c,matrix);
-    c.fillStyle="#f0eee8";c.font="96px Georgia";c.fillText(state.manifest.title,margin,132);
+    c.fillStyle="#f0eee8";c.font=`96px ${titleFont}`;c.fillText(state.manifest.title,margin,132);
     c.fillStyle="#a5afbb";c.font="42px sans-serif";
     lines.forEach((line,i)=>c.fillText(line,margin,mapSize+90+i*lineHeight));
     out.toBlob(blob=>{if(!blob){notice("Could not create the artwork. Please try again.");return;}hooks.event("artworkReady");if(artworkUrl)URL.revokeObjectURL(artworkUrl);artworkUrl=URL.createObjectURL(blob);const a=$("artwork-link");a.href=artworkUrl;a.download=filename;a.hidden=false;a.click();notice("Artwork ready with source and date information. Use Download PNG if your download did not start.");});

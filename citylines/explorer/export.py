@@ -60,8 +60,10 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
     db = None
     try:
         fingerprint = feed.fingerprint()
+        palette_data = {name: {**asdict(scheme), "other": "#aab4c1"} for name, scheme in color_schemes.items()}
         identity = {"version": VERSION, "feed": fingerprint, "center": center,
                     "radius": radius, "week": week_start.isoformat(), "palette": palette,
+                    "palettes": palette_data,
                     "place": place_name, "title": title, "attribution": attribution,
                     "water": hashlib.sha256(Path(water).read_bytes()).hexdigest() if water and Path(water).is_file() else None,
                     "provenance": provenance, "windowSeconds": WINDOW, "stepSeconds": STEP}
@@ -282,7 +284,6 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
             warnings.insert(0, "Archived schedule; these dates do not describe current service")
         if week_start.strftime("%Y%m%d") == start_date or end_day.strftime("%Y%m%d") == end_date:
             warnings.append("Feed boundary: overnight coverage outside the declared feed range may be incomplete")
-        palette_data = {name: {**asdict(scheme), "other": "#aab4c1"} for name, scheme in color_schemes.items()}
         manifest = {"schemaVersion": 1, "processorVersion": VERSION, "bundle": bundle_id,
                     "city": place_name, "title": title, "timezone": str(tz), "center": center,
                     "bounds": bounds, "feedFingerprint": fingerprint,
@@ -318,7 +319,7 @@ def main():
     parser.add_argument("--center", required=True, help="latitude,longitude")
     parser.add_argument("--max-dist", type=float, default=30)
     parser.add_argument("--week-start", required=True, type=date.fromisoformat)
-    parser.add_argument("--color-scheme", choices=color_schemes, default="default")
+    parser.add_argument("--color-scheme", choices=color_schemes, default="pastel")
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--attribution", default="")
     parser.add_argument("--provenance", type=Path, help="Public source metadata JSON: url, retrievedAt, license and licenseUrl")

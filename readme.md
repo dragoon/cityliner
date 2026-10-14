@@ -1,143 +1,72 @@
 # Cityliner
 
-![Cityliner city pulse posters: Berlin, Helsinki, and Tallinn](gallery/city_pane_trio.png)
+![Berlin, Helsinki and Tallinn](gallery/city_pane_trio.png)
 
-Cityliner turns public transport schedules into high-resolution city posters.
-It reads GTFS (General Transit Feed Specification) feeds and draws route segments on a map.
-Line thickness and opacity show how often vehicles run there.
+Generate transport posters and an interactive day explorer from GTFS schedules.
+[Try the website](https://cityliner.app/) or [request a city](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml).
 
-Use it to see which corridors carry the city, where the network thins out, and how rail, tram,
-bus, ferry, and cable routes fit together.
+## Setup
 
-## Actions
+Use Python 3.11:
 
-- **Generate a poster:** bring a GTFS feed and export a high-resolution PDF.
-- **[Build the Time Explorer](docs/explore/README.md):** export seven days of scheduled service into a static, interactive city map.
-- **[Open the showcase](https://cityliner.prokofyev.ch/):** see example posters and commercial options.
-- **[Open a city request](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml):** include the city, GTFS source, center coordinates, and whether the feed has `shapes.txt`.
-- **[Commission a print-ready poster](https://prokofyev.ch/):** request custom city, region, or transit-network work.
-- **Add a city config:** add a repeatable setup for another city and submit a pull request.
-
-## Public Project and Commercial Use
-
-This repository contains the open-source Cityliner engine. It does not include raw GTFS feeds,
-private processing caches, print masters, customer files, or commercial workflow.
-The reusable browser viewer includes a small synthetic demo under `docs/explore/data`.
-Production branding, curated city datasets, analytics and deployment are maintained separately.
-
-The code is GPLv3. Gallery images are Creative Commons Attribution 4.0 unless noted otherwise.
-GTFS feeds, map data, city/agency logos, and transit brand marks can have their own licenses and
-permissions. For commercial posters, use logo-free layouts unless you have explicit
-permission to use the relevant marks.
-
-## Table of Contents
-
-1. [Actions](#actions)
-2. [Public Project and Commercial Use](#public-project-and-commercial-use)
-3. [Features](#features)
-4. [Installation and Setup](#installation-and-setup)
-5. [Usage](#usage)
-6. [Gallery](#gallery)
-7. [Contribution](#contribution)
-8. [License](#license)
-9. [Acknowledgements](#acknowledgements)
-
-## Features
-
-- Draw GTFS routes by frequency and route type.
-- Export a high-resolution PDF.
-- Multiple color schemes: default, pastel, inferno, earthy, cool.
-- Water body visualization (beta).
-- Administrative borders (beta).
-- Static Time Explorer: local stop-to-stop timing, a five-minute slider, playback,
-  mode filters, shareable views, and credited PNG downloads. See the
-  [export guide](docs/explore/README.md), [data sources](docs/explore/SOURCES.md),
-  and [testing guide](docs/explore/TESTING.md).
-
-## Installation and Setup
-
-1. Clone this repository:
-    ```shell
-    git clone git@github.com:dragoon/cityliner.git
-    cd cityliner
-    ```
-2. Install required dependencies:
-   ```shell
-   pip install -r requirements.txt
-   ```
-3. Download the ocean shape file from OpenStreetMap: https://osmdata.openstreetmap.de/data/water-polygons.html (WGS84 projection) and unzip it into the `oceans` directory.
-4. Download GTFS data with `shapes.txt`. Start with the MobilityData catalog: https://github.com/MobilityData/mobility-database-catalogs.
-   Place the feed under `gtfs/[place-name]/**`.
-5. Add city or transport agency logos only if you have permission to use them, and place them under ``assets/logos/[place-name]/**``.
-
-## Usage
-Run:
-```shell
-python main.py --gtfs gtfs/[place-name] --center [center_coordinates] --poster [other_options]
+```sh
+python3.11 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 ```
 
-### Options:
-- `--gtfs`: Path to the GTFS directory. **(Required)**
-- `--processed-dir`: Path to the directory with intermediate files (defaults to ``./processed``).
-- `--center`: Coordinates of the center in the format `latitude,longitude`. **(Required)**
-- `--max-dist`: Maximum distance from the center on y-axis (in km). Default is 20 km.
-- `--width`: Width of the output drawing (in px).
-- `--height`: Height of the output drawing (in px)
-- `--poster`: Create a drawing for A0 poster size.
-- `--water`: Plot water bodies (beta).
-- `--admin-borders`: Plot administrative borders of the city/region determined by the center coordinates (beta).
-- `--color-scheme`: Choose a color scheme for the poster. Allowed values are: `default`, `pastel`, `inferno`, `earthy`, `cool`. Default is `default`.
-- `--logos`: List of logos for the poster (inside `./assets/logos/{place-name}/`)
+Gelasio and Lato are bundled. No system fonts or local configuration are needed.
+Keep downloaded GTFS feeds in ignored `gtfs/` and generated files in `processed/` or `posters/`.
 
-**(Either `--width` and `--height` or `--poster` must be provided)**
+## Posters
 
-Example Helsinki:
-```shell
-python main.py --gtfs=./gtfs/helsinki --place-name=helsinki --center=60.1706017,24.9414482 --poster --color-scheme=pastel --water --logos "helsinki.svg" "hsl.svg"
+Provide a GTFS directory containing `routes.txt`, `trips.txt`, `stop_times.txt` and `shapes.txt`:
+
+```sh
+.venv/bin/python main.py --gtfs gtfs/helsinki --place-name helsinki \
+  --center 60.1706017,24.9414482 --poster --color-scheme pastel
 ```
-See city configs in https://github.com/dragoon/cityliner/blob/master/citylines/process_configs.py
 
-## Gallery
+The PDF is written to `posters/helsinki-20.pdf`. `--max-dist` sets the vertical half-extent in km (default 20).
+Use `--poster` for A0, or supply both `--width` and `--height`.
 
-Line weight and opacity show service frequency on each route segment.
+- Palettes: `pastel` (default), `default` (ivory), `inferno` (apricot), `earthy` (green), `cool` (lavender).
+- `--water` and `--admin-borders` add map features. For sea polygons, download the [WGS84 water shapefile](https://osmdata.openstreetmap.de/data/water-polygons.html) into `oceans/`.
+- `--credit` adds attribution; `--logos` selects SVGs in `assets/logos/CITY/` when you are entitled to use them.
+- `--heading-font` or `CITYLINER_HEADING_FONT` optionally overrides Gelasio.
+- [City presets](citylines/process_configs.py) support repeatable batch runs.
 
-<p align="middle">
-<img width="48%" src="gallery/zurich_30_inferno.png" alt="Zürich 30km Inferno Scheme Poster"/>
-<img width="48%" src="gallery/helsinki_30_default.png" alt="Helsinki 30km Default Scheme Poster"/>
+For date-aware intensity, use an exported [explorer bundle](docs/explore/README.md):
+
+```sh
+.venv/bin/python -m citylines.poster_bundle --bundle processed/explorer/CITY/BUNDLE_ID \
+  --output posters/city.pdf --credit "Data provider and licence"
+```
+
+This uses the maximum scheduled departures in one hour during the bundle's week.
+The legacy `main.py` renderer counts trip records without calendar filtering.
+
+## Explorer
+
+```sh
+.venv/bin/python -m scripts.build_explorer_demo
+.venv/bin/python -m http.server 8765 --bind 127.0.0.1 --directory processed/explorer-demo
+```
+
+Open <http://127.0.0.1:8765/>. The fictional demo is generated locally; no datasets are stored in the source tree.
+See [export and hosting](docs/explore/README.md), [host integration](docs/explore/INTEGRATION.md) and [tests](docs/explore/TESTING.md).
+
+## Examples
+
+<p>
+<img width="48%" src="gallery/zurich_30_pastel.png" alt="Zürich, 30 km"/>
+<img width="48%" src="gallery/helsinki_30_pastel.png" alt="Helsinki, 30 km"/>
+<img width="48%" src="gallery/tallinn_30_pastel.png" alt="Tallinn, 30 km"/>
+<img width="48%" src="gallery/berlin_50_pastel.png" alt="Berlin, 50 km"/>
 </p>
 
-<p align="middle">
-<img width="48%" src="gallery/tallinn_30_pastel.png" alt="Tallinn 30km Pastel Scheme Poster"/>
-<img width="48%" src="gallery/berlin_50_cool.png" alt="Berlin 50km Cool Scheme Poster"/>
-</p>
+## Licences
 
-
-## Contribution
-
-Forks, issues, and pull requests are welcome. Useful contributions include city configs,
-setup fixes, color schemes, preview generation, and license notes for public data sources.
-
-For city requests, [open an issue](https://github.com/dragoon/cityliner/issues/new?template=city_request.yml) with the city name,
-GTFS source, center coordinates, and whether the feed includes `shapes.txt`.
-
-## License
-
-### Gallery
-
-	The gallery photos are licensed under the Creative Commons Attribution
-	4.0 International license: http://creativecommons.org/licenses/by/4.0/.
-
-### Code
-
-This source code is licensed under GNU GPLv3. See the `LICENSE` file for more details.
-
-    Copyright (c) 2023
-	Roman Prokofyev <https://prokofyev.ch/>
-
-## Acknowledgements
-This project is inspired by Michael Mueller's [gtfs-visualizations](https://github.com/cmichi/gtfs-visualizations) project, implemented with Node.js and [Processing](https://processing.org/), and my fork: https://github.com/dragoon/gtfs-visualizations,
-which allowed to process large GTFS files, added actual poster-generation code,
-and a possibility to restrict the visualization area within a certain radius, among other improvements.
-
-This implementation has been developed from scratch with Python,
-ReportLab for PDF rendering, different color palettes, and a possibility to visualize water bodies using OpenSteetMap data, among other changes.
+Code: [GPLv3](LICENSE). Example images: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Fonts, source data and logos retain their own terms; see [credits and marks](docs/POSTER-SOURCES.md).
+Production branding, datasets, analytics and deployment are maintained separately.
+Inspired by [Michael Mueller's GTFS visualisations](https://github.com/cmichi/gtfs-visualizations).

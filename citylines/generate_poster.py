@@ -1,5 +1,6 @@
 import json
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -21,6 +22,16 @@ from citylines.gtfs.domain import RenderArea
 from citylines.util.colors import ColorScheme
 
 
+def heading_font_path(explicit_path=None):
+    """Use bundled Gelasio, with an optional explicit font override."""
+    selected = (explicit_path or os.environ.get("CITYLINER_HEADING_FONT") or
+                Path(__file__).resolve().parent.parent / "assets/fonts/Gelasio-Regular.ttf")
+    path = Path(selected).expanduser()
+    if not path.is_file():
+        raise FileNotFoundError(f"Poster heading font not found: {path}")
+    return path
+
+
 @dataclass
 class Poster:
     render_area: RenderArea
@@ -28,7 +39,10 @@ class Poster:
     input_dir: Path
     city: str
     text: str
-    logos: list[str]
+    logos: list[str] = field(default_factory=list)
+    title: str | None = None
+    heading_font: Path | None = None
+    intensity_metric: str = "trip-records"
 
     def __post_init__(self):
         self.logo_gap = 70*self.scaling_w
@@ -62,14 +76,20 @@ class Poster:
         return total_w
 
     def generate_single(self,  color_scheme: ColorScheme, add_water: bool = False, add_admin_borders: bool = False):
-        pdfmetrics.registerFont(TTFont('Lato', 'assets/fonts/Lato-Regular.ttf'))
-        pdfmetrics.registerFont(TTFont('Garamond', 'assets/fonts/EBGaramond-VariableFont_wght.ttf'))
+        assets = Path(__file__).resolve().parent.parent / "assets"
+        pdfmetrics.registerFont(TTFont('Lato', str(assets / 'fonts/Lato-Regular.ttf')))
+        pdfmetrics.registerFont(TTFont('PosterHeading', str(heading_font_path(self.heading_font))))
 
         self.out_path.parent.mkdir(parents=True, exist_ok=True)
 
         # reportlab measures in physical mm, not px, 0.24 is a scale factor
         c = canvas.Canvas(str(self.out_path),
                           pagesize=(self.render_area.width_px*0.24, self.render_area.height_px*0.24))
+        display_title = self.title or {"zurich": "Zürich", "wroclaw": "Wrocław", "st-gallen": "St. Gallen"}.get(self.city, self.city.title())
+        c.setTitle(f"{display_title} - Cityliner public transport poster")
+        c.setAuthor("Roman Prokofyev")
+        c.setCreator("Cityliner")
+        c.setSubject("Independent public transport artwork with source attribution")
         c.scale(0.24, 0.24)
         c.setLineWidth(1)
         c.setFillColorRGB(0, 0, 0)
@@ -90,14 +110,13 @@ class Poster:
         for i, line in enumerate(self.text.split('\n')):
             c.drawString(total_w + self.extra_text_start_x, self.extra_text_start_y + i * self.extra_text_gap_y, line.strip())
 
-        # Adding additional text on the poster
-        # c.drawRightString(self.render_area.width_px - 200, 260, "Generated on cityliner.io.")
-        # c.drawRightString(self.render_area.width_px - 200, 120,
-        #                   "License for personal use only. Redistribution or commercial use is prohibited.")
-
         # Add city name on top
-        c.setFont("Garamond", self.heading_font_size)
-        c.drawString(self.heading_start_x, self.heading_start_y, self.city.title())
+        c.setFillColorRGB(gray_value, gray_value, gray_value)
+        title = display_title
+        available_width = self.render_area.width_px - 2 * self.heading_start_x
+        title_width = pdfmetrics.stringWidth(title, "PosterHeading", self.heading_font_size)
+        c.setFont("PosterHeading", min(self.heading_font_size, self.heading_font_size * available_width / title_width))
+        c.drawString(self.heading_start_x, self.heading_start_y, title)
 
         c.showPage()
         c.save()
@@ -161,15 +180,16 @@ class Poster:
                     color = get_route_color(simple_route_type, color_scheme)
                     points = line[2].split(",")
 
-                    factor = 1.7
-                    stroke_weight = math.log(float(trips) * factor) * 3
-                    if stroke_weight < 0:
-                        stroke_weight = 1.0 * factor
-
+                    if self.intensity_metric == "peak-hour":
+                        # Sections are deduplicated, so brightness must not rely
+                        # on overlapping timetable variants accumulating alpha.
+                        intensity = math.log1p(float(trips)) / math.log1p(max_trips)
+                        alpha = .1 + .9 * intensity ** 1.2
+                        stroke_weight = 4 + 18 * intensity
+                    else:
+                        stroke_weight = max(1.7, math.log(float(trips) * 1.7) * 3)
+                        alpha = max(20, 100 * (float(trips) / max_trips)) / 255
                     c.setLineWidth(stroke_weight*self.scaling_w)
-                    alph = 100 * (float(trips) / max_trips)
-                    if alph < 20.0:
-                        alph = 20.0
 
                     c.setLineCap(2)  # square
 
@@ -179,7 +199,7 @@ class Poster:
                         color_alpha = Color(color.red, color.green, color.blue, 0.4)
                         c.setStrokeColor(color_alpha)
                     else:
-                        color_alpha = Color(color.red, color.green, color.blue, alph / 255.0)
+                        color_alpha = Color(color.red, color.green, color.blue, alpha)
                         c.setStrokeColor(color_alpha)
                         c.setDash([])
 
@@ -211,7 +231,7 @@ class Poster:
             points = [coord for point in body["nodes"] for coord in (point["x"], point["y"])]
             # Add a Polygon or any other shapes to the Drawing
             if len(points) > 2:
-                polygon = Polygon(points, fillColor='#0e142a')
+                polygon = Polygon(points, fillColor='#0e142a', strokeColor=None)
                 d.add(polygon)
 
             # add islands with black on top

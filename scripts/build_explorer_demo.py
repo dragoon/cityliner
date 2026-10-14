@@ -1,14 +1,25 @@
 """Generate the small synthetic viewer demo without downloading any data."""
+import argparse
 import csv
 from datetime import date
 from pathlib import Path
 import tempfile
+import shutil
 
 from citylines.explorer.export import export_feed
 from citylines.explorer.publish import publish
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', type=Path, default=Path('processed/explorer-demo'),
+                        help='Local preview directory; generated files stay outside the source tree')
+    args = parser.parse_args(argv)
+    viewer = Path(__file__).resolve().parents[1] / 'docs/explore'
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    for name in ['index.html', 'explorer.js', 'intensity.js', 'integration.js', 'explorer.css']:
+        shutil.copy2(viewer / name, args.output_dir / name)
+    shutil.copytree(viewer / 'fonts', args.output_dir / 'fonts', dirs_exist_ok=True)
     with tempfile.TemporaryDirectory() as temp:
         work = Path(temp)
         feed = work / "feed"
@@ -41,9 +52,9 @@ def main():
         table("stop_times.txt", "trip_id,arrival_time,departure_time,stop_id,stop_sequence", times)
         table("calendar.txt", "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date",
               [("daily", 1, 1, 1, 1, 1, 1, 1, "20240101", "20240107")])
-        _, _, bundle = export_feed(feed, "demo", "Synthetic network", (0, 0), 4, date(2024, 1, 1), "cool", work / "out",
+        _, _, bundle = export_feed(feed, "demo", "Synthetic network", (0, 0), 4, date(2024, 1, 1), "pastel", work / "out",
                                   attribution="Synthetic timetable for demonstrating Cityliner; no real transport service.", cache_dir=work / "cache")
-        print(publish(bundle, Path("docs/explore")))
+        print(publish(bundle, args.output_dir))
 
 
 if __name__ == "__main__":

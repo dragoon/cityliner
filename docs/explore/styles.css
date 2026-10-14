@@ -2,6 +2,14 @@
 @source "./index.html";
 @source "./explorer.js";
 
+@font-face {
+  font-family: Gelasio;
+  src: url("./fonts/Gelasio-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 @plugin "daisyui" {
   themes: false;
   include: button, select, range;
@@ -59,7 +67,7 @@
   --color-notice: #121c29;
   --color-error: #f7bbae;
   --color-error-edge: #ae685d;
-  --font-display: Georgia, serif;
+  --font-display: Gelasio, serif;
 }
 
 @layer base {
