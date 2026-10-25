@@ -34,7 +34,7 @@ def mode_for(value):
         return "rail"
     if value in (3, 11) or 200 <= value <= 299 or 700 <= value <= 899:
         return "bus"
-    if value == 4 or 1000 <= value <= 1099:
+    if value == 4 or 1000 <= value <= 1099 or 1200 <= value <= 1299:
         return "ferry_water"
     if value in (5, 6, 7) or 1300 <= value <= 1499:
         return "funicular_cable_gondola"
@@ -91,6 +91,13 @@ def export_feed(gtfs, place_name, title, center, radius, week_start, palette,
         if not coverage:
             raise ValueError("The feed has no service calendar dates")
         start_date, end_date = min(coverage), max(coverage)
+        # A few rail calendars can span the year while the rest of a regional
+        # feed is only published for a fortnight (for example PID).
+        for info in feed.rows("feed_info.txt"):
+            if info.get("feed_start_date"):
+                start_date = max(start_date, info["feed_start_date"])
+            if info.get("feed_end_date"):
+                end_date = min(end_date, info["feed_end_date"])
         end_day = week_start + timedelta(days=6)
         if week_start.strftime("%Y%m%d") < start_date or end_day.strftime("%Y%m%d") > end_date:
             raise ValueError(f"Requested week is outside feed coverage {start_date}–{end_date}")
