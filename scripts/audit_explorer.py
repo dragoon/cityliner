@@ -1,12 +1,12 @@
 """Independent raw-CSV checks of sample exported stop-pair windows.
 
 This does not call the exporter's schedule, calendar, or geometry functions.
-Use archive weeks without DST transitions for this deliberately simple audit.
+Service origins follow the GTFS local-noon-minus-twelve-elapsed-hours rule.
 """
 import argparse
 from collections import defaultdict
 import csv
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 import gzip
 import json
 from pathlib import Path
@@ -82,7 +82,7 @@ def audit(folder, bundle):
             if (sid, key) in exceptions:
                 active = exceptions[(sid, key)] == "1"
             if active:
-                origins[sid].append(datetime.combine(d, time(), tz).timestamp())
+                origins[sid].append(datetime.combine(d, time(12), tz).astimezone(timezone.utc).timestamp() - 43200)
     departures = defaultdict(list)
     for tid, rows in stop_times.items():
         rows.sort(key=lambda r: int(r["stop_sequence"]))
@@ -92,13 +92,15 @@ def audit(folder, bundle):
             if dep is not None:
                 departures[(a["stop_id"], b["stop_id"], trips[tid]["route_id"])].append((tid, dep, first))
     checks, mismatches = [], []
-    for day_info in manifest["dates"][:2]:
+    # Include weekends and DST transition days, not just the first two weekdays.
+    for day_info in manifest["dates"]:
         data = json.loads(gzip.decompress((bundle / day_info["file"]).read_bytes()))
         current = {}
         frames = []
         for f in data["frames"]:
             current.update(f["changes"])
-            if f["label"].startswith(("07:00", "07:05", "07:10", "08:00", "08:05", "08:10", "09:00", "23:00", "23:55")):
+            # Include midday boat service, which can be absent from morning windows.
+            if f["label"].startswith(("07:00", "07:05", "07:10", "08:00", "08:05", "08:10", "09:00", "12:00", "15:00", "23:00", "23:55")):
                 frames.append((f, current.copy()))
         for (mode, a, b), sections, route_ids in candidates:
             rid = next(iter(route_ids))
