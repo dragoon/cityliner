@@ -22,5 +22,16 @@
     };
     return hooks;
   }
-  return {createHooks};
+  function catalogUrl(settings, href) {
+    return new URL(settings?.catalogUrl || "catalog.json", href).href;
+  }
+  function manifestUrl(entry, params, catalog) {
+    const latest = new URL(entry.manifest, catalog);
+    const bundle = params.get("bundle");
+    const archived = entry.versions?.find(v => v.bundle === bundle);
+    if (archived) return new URL(archived.manifest, catalog).href;
+    return bundle && /^[a-f0-9]{16}$/.test(bundle)
+      ? new URL(`../${bundle}/manifest.json`, latest).href : latest.href;
+  }
+  return {createHooks, catalogUrl, manifestUrl};
 });

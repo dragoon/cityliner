@@ -6,6 +6,7 @@
   const background = document.createElement("canvas");
   const intensityModel = window.CitylinerIntensity;
   const hooks = window.CitylinerIntegration.createHooks(window.citylinerHooks);
+  const catalogUrl = window.CitylinerIntegration.catalogUrl(window.citylinerData, location.href);
   const names = {tram:"Tram",subway:"Metro",rail:"Rail",bus:"Bus",ferry_water:"Ferry",funicular_cable_gondola:"Cable",other:"Other"};
   const state = {catalog:[],manifest:null,geometry:null,frames:[],values:[],display:null,transition:false,index:0,referenceIndex:0,view:"rhythm",modes:new Set(),palette:"default",playing:false,generation:0,paths:[],matrix:null,dayCache:new Map(),retry:null};
   let animation = 0, playEpoch = 0, playStart = 0, playFrom = null, hoverFrame = 0, artworkUrl = null;
@@ -29,6 +30,7 @@
     if (value) { pendingReadiness = false; hooks.loading(); }
     $("loading").hidden = !value;
     for (const id of ["time","play","share","download","palette","date","view"]) $(id).disabled = value;
+    $("version").disabled = value || $("version").options.length < 2;
     $("modes").querySelectorAll("button").forEach(b=>b.disabled=value);
   }
   function error(exc) {
@@ -41,9 +43,7 @@
   function dateLabel(value) { return new Date(value+"T12:00:00Z").toLocaleDateString("en",{weekday:"short",month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
   function sourceTime(value) { const date=new Date(value);return Number.isFinite(date.getTime())?date.toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC"})+" UTC":"Unknown"; }
   function versionUrl(entry, params) {
-    const latest = new URL(entry.manifest,location.href);
-    const bundle = params.get("bundle");
-    return bundle && /^[a-f0-9]{16}$/.test(bundle) ? new URL(`../${bundle}/manifest.json`,latest).href : latest.href;
+    return window.CitylinerIntegration.manifestUrl(entry, params, catalogUrl);
   }
   async function loadCity(params = new URLSearchParams()) {
     state.retry=()=>loadCity(params);
@@ -57,7 +57,7 @@
       let url=versionUrl(entry,params), manifest;
       try { manifest=await read(url,"manifest"); } catch(exc) {
         if (!params.has("bundle")) throw exc;
-        url=new URL(entry.manifest,location.href).href;manifest=await read(url,"manifest");
+        url=new URL(entry.manifest,catalogUrl).href;manifest=await read(url,"manifest");
         notice("That archive version is unavailable. Showing the published version.");
       }
       if(manifest.schemaVersion!==1||manifest.frameEncoding!=="sparse-deltas-v1") throw Object.assign(new Error("Unsupported export bundle version"),{stage:"manifest"});
@@ -65,6 +65,10 @@
       const geometry=await read(new URL(manifest.geometry,base).href,"geometry");
       if(token!==state.generation)return;
       state.manifest=manifest;state.geometry=geometry;state.base=base;state.dayCache.clear();
+      const versions = [...(entry.versions || [])];
+      if(!versions.some(v=>v.bundle===manifest.bundle)) versions.unshift({bundle:manifest.bundle,weekStart:manifest.dates[0].date,weekEnd:manifest.dates.at(-1).date});
+      $("version").replaceChildren(...versions.map(v=>option(v.bundle,`${v.weekStart} — ${v.weekEnd}`)));
+      $("version").value=manifest.bundle;
       state.palette=Object.hasOwn(manifest.palettes,params.get("palette"))?params.get("palette"):manifest.palette;
       const hasPeaks=geometry.sections.every(s=>Number.isFinite(s.peakDepartures));
       $("view").querySelectorAll("option").forEach(o=>o.disabled=o.value!=="departures"&&!hasPeaks);
@@ -240,6 +244,7 @@
     $("section-detail").textContent=`${best.routes.map(r=>state.geometry.routes[r].name).join(" · ")} · ${names[best.mode]} · ${state.playing||state.transition?"≈ ":""}${Number(count.toFixed(2))} ${best.estimated?"scheduled / expected":"scheduled"} departures in this hour${comparison}${state.playing||state.transition?" · blended display":""}${best.interpolated?" · includes interpolated stop timing":""}`;
   }
   $("city").addEventListener("change",()=>{hooks.action();loadCity();});
+  $("version").addEventListener("change",()=>{hooks.action();const params=new URLSearchParams(location.hash.slice(1));params.set("bundle",$("version").value);params.delete("date");params.delete("time");loadCity(params);});
   $("date").addEventListener("change",()=>{hooks.action();loadDay();});
   $("time").addEventListener("input",()=>{pause();hooks.time(state.frames[Number($("time").value)]?.start);settle(Number($("time").value));});
   $("palette").addEventListener("change",()=>{state.palette=$("palette").value;render();saveUrl();});
@@ -274,6 +279,6 @@
   window.addEventListener("hashchange",()=>{const p=new URLSearchParams(location.hash.slice(1));if(state.catalog.some(c=>c.city===p.get("city")))$("city").value=p.get("city");loadCity(p);});
   new ResizeObserver(resize).observe(canvas);
   document.addEventListener("visibilitychange",()=>{if(document.hidden){pause();if(state.display&&state.values[state.index]){state.display.set(state.values[state.index]);render();}}});
-  async function start(){try{state.retry=start;busy(true);const catalog=await read("catalog.json","catalog");state.catalog=catalog.cities;if(!state.catalog.length)throw new Error("No city bundles have been published yet.");$("city").replaceChildren(...state.catalog.map(c=>option(c.city,c.title)));if(state.catalog.some(c=>c.city===initial.get("city")))$("city").value=initial.get("city");$("city").disabled=false;await loadCity(initial);}catch(exc){error(exc);}}
+  async function start(){try{state.retry=start;busy(true);const catalog=await read(catalogUrl,"catalog");state.catalog=catalog.cities;if(!state.catalog.length)throw new Error("No city bundles have been published yet.");$("city").replaceChildren(...state.catalog.map(c=>option(c.city,c.title)));if(state.catalog.some(c=>c.city===initial.get("city")))$("city").value=initial.get("city");$("city").disabled=false;await loadCity(initial);}catch(exc){error(exc);}}
   start();
 })();
